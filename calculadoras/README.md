@@ -11,6 +11,7 @@ Hub estático de calculadoras e simuladores online criado dentro do repositório
 - URLs amigáveis para SEO;
 - cenários compartilháveis pela query string;
 - comparação Cenário A × Cenário B nas simulações de longo prazo;
+- análise de sensibilidade e pontos de equilíbrio em Comprar × Alugar;
 - botão `Copiar link`;
 - gráficos SVG responsivos;
 - metadados específicos por ferramenta;
@@ -82,6 +83,25 @@ O resultado mostra patrimônio final em cada alternativa, valor do imóvel, sald
 
 Não estão incluídos no MVP custos de compra/venda, cartório, corretagem, impostos sobre investimentos, CET detalhado, tributação ou particularidades contratuais.
 
+## Sensibilidade e pontos de equilíbrio
+
+`sensitivity-core.js` usa o mesmo `buyVsRentProjection()` para procurar mudanças de decisão sem duplicar a lógica do simulador.
+
+No Cenário A de Comprar × Alugar, o painel calcula automaticamente:
+
+- **valorização anual de equilíbrio do imóvel**: taxa em que os patrimônios finais ficam aproximadamente iguais;
+- **aluguel mensal inicial de equilíbrio**: valor em que as duas estratégias empatam mantendo as demais premissas;
+- **matriz 5 × 5**: valorização do imóvel × retorno da carteira, em passos de 2 pontos percentuais ao redor das premissas atuais.
+
+O solver faz uma varredura da faixa e depois usa bisseção no cruzamento encontrado. Se não houver cruzamento na faixa analisada, a interface informa que o ponto está fora da faixa em vez de extrapolar um valor artificial.
+
+Com os valores padrão atuais do MVP, os testes de regressão encontram aproximadamente:
+
+- valorização do imóvel de equilíbrio: **6,38% a.a.**;
+- aluguel inicial de equilíbrio: **R$ 3.225/mês**.
+
+Esses números mudam imediatamente quando qualquer premissa do Cenário A é alterada.
+
 ## Arquitetura do cálculo
 
 As fórmulas foram centralizadas em `formulas.js`. Esse módulo não depende do DOM e funciona tanto no navegador quanto no Node.js.
@@ -95,9 +115,14 @@ Os gráficos usam séries geradas pelo mesmo núcleo:
 - `targetSeries()` para meta de patrimônio;
 - `buyVsRentSeries()` para comprar vs. alugar.
 
+A análise de sensibilidade fica separada em `sensitivity-core.js` e a apresentação em `sensitivity.js`, mantendo cálculo e DOM desacoplados.
+
 ## Testes automatizados
 
-A suíte está em `calculadoras/tests/core.test.js` e cobre cálculos, séries temporais, links compartilháveis, isolamento entre parâmetros de Cenário A/B e o simulador imobiliário.
+As suítes ficam em `calculadoras/tests/`:
+
+- `core.test.js`: cálculos, séries temporais, links compartilháveis, Cenário A/B e simulador imobiliário;
+- `sensitivity.test.js`: pontos de equilíbrio, matriz de sensibilidade e casos sem cruzamento.
 
 Para rodar localmente, com Node.js 18+:
 
@@ -166,8 +191,8 @@ Existe `sitemap.template.xml` com home + 12 ferramentas. Quando o domínio final
 
 1. Publicar o primeiro preview no Cloudflare Pages.
 2. Conectar domínio/subdomínio e ativar `sitemap.xml`.
-3. Criar análise de sensibilidade / ponto de equilíbrio para simuladores de decisão.
-4. Adicionar custos opcionais mais detalhados ao simulador imobiliário.
+3. Adicionar custos opcionais detalhados ao simulador imobiliário.
+4. Expandir sensibilidade para outras decisões, como amortizar × investir.
 5. Integrar APIs apenas para dados realmente atuais, como CDI e inflação.
 
 ## Aviso
