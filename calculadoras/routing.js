@@ -10,7 +10,8 @@
     { id: 'combustivel', path: '/custo-de-combustivel', title: 'Calculadora de Custo de Combustível', description: 'Calcule litros necessários, custo de uma viagem e custo por quilômetro com base no consumo do veículo.' },
     { id: 'avista-ou-parcelado', path: '/avista-ou-parcelado', title: 'À Vista ou Parcelado? Simulador', description: 'Compare comprar à vista ou parcelado usando preço, parcelas e custo de oportunidade do dinheiro.' },
     { id: 'amortizar-ou-investir', path: '/amortizar-ou-investir', title: 'Amortizar ou Investir? Simulador', description: 'Compare o custo de uma dívida com o retorno esperado de um investimento e veja qual alternativa tende a ser mais vantajosa.' },
-    { id: 'meta-de-patrimonio', path: '/meta-de-patrimonio', title: 'Calculadora de Meta de Patrimônio', description: 'Descubra em quanto tempo você pode alcançar uma meta de patrimônio com capital inicial, aportes e taxa de retorno.' }
+    { id: 'meta-de-patrimonio', path: '/meta-de-patrimonio', title: 'Calculadora de Meta de Patrimônio', description: 'Descubra em quanto tempo você pode alcançar uma meta de patrimônio com capital inicial, aportes e taxa de retorno.' },
+    { id: 'comprar-ou-alugar', path: '/comprar-ou-alugar', title: 'Comprar ou Alugar Imóvel? Simulador', description: 'Compare comprar um imóvel com alugar e investir, considerando financiamento, entrada, valorização, reajuste do aluguel e retorno dos investimentos.' }
   ];
 
   const byId = Object.fromEntries(routes.map((route) => [route.id, route]));
