@@ -90,10 +90,14 @@
 
   window.addEventListener('DOMContentLoaded', () => {
     const route = byPath[normalizePath(window.location.pathname)];
+    const initialSearch = window.location.search;
     setMeta(route || null);
 
     if (route && typeof window.openCalculator === 'function') {
       window.openCalculator(route.id);
+      if (initialSearch) {
+        originalReplaceState(null, '', `${route.path}${initialSearch}`);
+      }
       setMeta(route);
     }
   });
