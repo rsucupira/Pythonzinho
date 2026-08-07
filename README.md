@@ -7,9 +7,11 @@ Aulas de python
 
 ## Pythonzinho Calcula — MVP
 
-Foi adicionado um MVP de hub de calculadoras online na pasta [`calculadoras/`](./calculadoras/).
+Foi adicionado um MVP de hub de calculadoras e simuladores online na pasta [`calculadoras/`](./calculadoras/).
 
-O MVP inclui busca, layout responsivo e 8 calculadoras funcionais para finanças, compras, matemática, negócios e veículos.
+O MVP inclui busca, layout responsivo, 12 ferramentas funcionais, simuladores de decisão, URLs amigáveis, cenários compartilháveis, gráficos SVG e testes automatizados.
+
+Entre os simuladores estão `à vista ou parcelado`, `amortizar ou investir`, `meta de patrimônio` e `comprar imóvel ou alugar e investir`.
 
 Para testar localmente:
 
@@ -19,3 +21,9 @@ python -m http.server 8000
 ```
 
 Depois acesse `http://localhost:8000`.
+
+Os testes podem ser executados com:
+
+```bash
+node --test calculadoras/tests/*.test.js
+```
