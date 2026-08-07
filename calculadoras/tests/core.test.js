@@ -110,6 +110,64 @@ test('série de meta termina no mesmo mês da projeção', () => {
   assert.equal(series.points.at(-1).target, 1000000);
 });
 
+test('comprar à vista sem custos acumula a economia do aluguel no patrimônio', () => {
+  const r = math.buyVsRentProjection({
+    propertyPrice: 120000,
+    downPayment: 120000,
+    mortgageRate: 0,
+    mortgageYears: 30,
+    rentMonthly: 1000,
+    rentGrowthRate: 0,
+    propertyAppreciation: 0,
+    investmentReturn: 0,
+    ownerCostRate: 0,
+    horizonYears: 1
+  });
+  assert.equal(r.recommendation, 'buy');
+  approx(r.buyerNetWorth, 132000);
+  approx(r.renterNetWorth, 120000);
+  approx(r.difference, 12000);
+  approx(r.remainingDebt, 0);
+});
+
+test('série comprar vs alugar começa com o mesmo capital e respeita o horizonte', () => {
+  const input = {
+    propertyPrice: 500000,
+    downPayment: 100000,
+    mortgageRate: 11,
+    mortgageYears: 30,
+    rentMonthly: 2500,
+    rentGrowthRate: 4,
+    propertyAppreciation: 4,
+    investmentReturn: 10,
+    ownerCostRate: 1.5,
+    horizonYears: 10
+  };
+  const r = math.buyVsRentSeries(input);
+  assert.equal(r.points.length, 121);
+  approx(r.points[0].buyerNetWorth, 100000);
+  approx(r.points[0].renterNetWorth, 100000);
+  assert.ok(r.remainingDebt >= 0 && r.remainingDebt < 400000);
+  assert.ok(r.propertyValue > 500000);
+  approx(r.points.at(-1).buyerNetWorth, r.buyerNetWorth, 1e-6);
+  approx(r.points.at(-1).renterNetWorth, r.renterNetWorth, 1e-6);
+});
+
+test('comprar vs alugar rejeita entrada acima do preço do imóvel', () => {
+  assert.throws(() => math.buyVsRentProjection({
+    propertyPrice: 100000,
+    downPayment: 110000,
+    mortgageRate: 10,
+    mortgageYears: 20,
+    rentMonthly: 1000,
+    rentGrowthRate: 4,
+    propertyAppreciation: 4,
+    investmentReturn: 10,
+    ownerCostRate: 1,
+    horizonYears: 10
+  }), RangeError);
+});
+
 test('URL compartilhável faz round-trip dos valores', () => {
   const fields = [
     { id: 'initial' }, { id: 'monthly' }, { id: 'annualRate' }, { id: 'years' }
@@ -119,8 +177,19 @@ test('URL compartilhável faz round-trip dos valores', () => {
   assert.deepEqual(scenario.decode(path.slice(path.indexOf('?')), fields), { initial: 10000, monthly: 500, annualRate: 10, years: 15 });
 });
 
+test('URL de comprar vs alugar preserva premissas principais', () => {
+  const fields = [
+    { id: 'propertyPrice' }, { id: 'downPayment' }, { id: 'rentMonthly' }, { id: 'horizonYears' }
+  ];
+  const values = { propertyPrice: 500000, downPayment: 100000, rentMonthly: 2500, horizonYears: 10 };
+  const path = scenario.encode('comprar-ou-alugar', fields, values);
+  assert.equal(path, '/comprar-ou-alugar?propertyPrice=500000&downPayment=100000&rentMonthly=2500&horizonYears=10');
+  assert.deepEqual(scenario.decode(path.slice(path.indexOf('?')), fields), values);
+});
+
 test('codec ignora parâmetros desconhecidos ou não numéricos', () => {
   const fields = [{ id: 'base' }, { id: 'percent' }];
   assert.deepEqual(scenario.decode('?base=1000&percent=abc&hack=1', fields), { base: 1000 });
   assert.equal(scenario.pathFor('porcentagem'), '/porcentagem');
+  assert.equal(scenario.pathFor('comprar-ou-alugar'), '/comprar-ou-alugar');
 });
