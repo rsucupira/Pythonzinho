@@ -1,17 +1,5 @@
 (() => {
-  const PATH_BY_ID = {
-    'juros-compostos': '/juros-compostos',
-    financiamento: '/financiamento',
-    porcentagem: '/porcentagem',
-    desconto: '/desconto',
-    'regra-de-tres': '/regra-de-tres',
-    roi: '/roi',
-    'margem-markup': '/margem-e-markup',
-    combustivel: '/custo-de-combustivel',
-    'avista-ou-parcelado': '/avista-ou-parcelado',
-    'amortizar-ou-investir': '/amortizar-ou-investir',
-    'meta-de-patrimonio': '/meta-de-patrimonio'
-  };
+  if (typeof ScenarioCodec === 'undefined') return;
 
   const panel = document.querySelector('#calculator-panel');
   let applyingSharedValues = false;
@@ -25,23 +13,17 @@
     return panel.querySelector('#active-form');
   }
 
-  function cleanNumber(value) {
-    const number = Number(value);
-    return Number.isFinite(number) ? String(number) : null;
+  function formValues(calc, form) {
+    const values = {};
+    calc.fields.forEach((field) => {
+      const input = form.elements[field.id];
+      if (input) values[field.id] = input.value;
+    });
+    return values;
   }
 
   function buildScenarioUrl(calc, form) {
-    const path = PATH_BY_ID[calc.id] || window.location.pathname || '/';
-    const url = new URL(path, window.location.origin);
-
-    calc.fields.forEach((field) => {
-      const input = form.elements[field.id];
-      if (!input) return;
-      const value = cleanNumber(input.value);
-      if (value !== null) url.searchParams.set(field.id, value);
-    });
-
-    return url;
+    return new URL(ScenarioCodec.encode(calc.id, calc.fields, formValues(calc, form)), window.location.origin);
   }
 
   function syncBrowserUrl(calc, form) {
@@ -60,24 +42,16 @@
     const form = getActiveForm();
     if (!calc || !form) return;
 
-    const params = new URLSearchParams(window.location.search);
-    let loadedAny = false;
+    const values = ScenarioCodec.decode(window.location.search, calc.fields);
+    const entries = Object.entries(values);
+    if (!entries.length) return;
+
     applyingSharedValues = true;
-
-    calc.fields.forEach((field) => {
-      const raw = params.get(field.id);
-      if (raw === null) return;
-      const value = cleanNumber(raw);
-      if (value === null) return;
-      form.elements[field.id].value = value;
-      loadedAny = true;
+    entries.forEach(([key, value]) => {
+      if (form.elements[key]) form.elements[key].value = value;
     });
-
     applyingSharedValues = false;
-
-    if (loadedAny) {
-      calculateActive(calc, form);
-    }
+    calculateActive(calc, form);
   }
 
   function fallbackCopy(text) {
@@ -95,18 +69,17 @@
 
   async function copyScenario(button, calc, form) {
     const url = buildScenarioUrl(calc, form);
-    const text = url.href;
     let copied = false;
 
     try {
       if (navigator.clipboard && window.isSecureContext) {
-        await navigator.clipboard.writeText(text);
+        await navigator.clipboard.writeText(url.href);
         copied = true;
       } else {
-        copied = fallbackCopy(text);
+        copied = fallbackCopy(url.href);
       }
     } catch (_) {
-      copied = fallbackCopy(text);
+      copied = fallbackCopy(url.href);
     }
 
     if (copied) {
@@ -156,8 +129,7 @@
           window.setTimeout(() => {
             const currentCalc = getActiveCalculator();
             if (!currentCalc) return;
-            const path = PATH_BY_ID[currentCalc.id] || '/';
-            history.replaceState(null, '', path);
+            history.replaceState(null, '', ScenarioCodec.pathFor(currentCalc.id));
           }, 0);
         });
       }
