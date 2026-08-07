@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Pythonzinho Calcula: hub gratuito de calculadoras para dinheiro, finanças, compras, negócios e dia a dia." />
+  <meta name="theme-color" content="#0b1220" />
+  <title>Pythonzinho Calcula — contas úteis em segundos</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#" aria-label="Pythonzinho Calcula — início">
+      <span class="brand-mark">P</span>
+      <span>Pythonzinho <strong>Calcula</strong></span>
+    </a>
+    <a class="github-link" href="https://github.com/rsucupira/Pythonzinho" target="_blank" rel="noreferrer">GitHub ↗</a>
+  </header>
+
+  <main>
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="eyebrow">MVP · 8 calculadoras gratuitas</div>
+      <h1 id="hero-title">Uma pergunta.<br /><span>Uma conta.</span></h1>
+      <p>Faça cálculos úteis do dia a dia, compare cenários e entenda o resultado sem planilha.</p>
+
+      <label class="search" for="calculator-search">
+        <span aria-hidden="true">⌕</span>
+        <input id="calculator-search" type="search" placeholder="O que você quer calcular? Ex.: juros, desconto, combustível..." autocomplete="off" />
+      </label>
+
+      <div class="quick-links" aria-label="Atalhos">
+        <span>Populares:</span>
+        <button data-open="juros-compostos">Juros compostos</button>
+        <button data-open="financiamento">Financiamento</button>
+        <button data-open="porcentagem">Porcentagem</button>
+      </div>
+    </section>
+
+    <section class="workspace" aria-label="Calculadoras">
+      <aside class="catalog">
+        <div class="catalog-heading">
+          <div>
+            <span class="section-kicker">Ferramentas</span>
+            <h2>Escolha uma conta</h2>
+          </div>
+          <span id="calculator-count" class="count">8</span>
+        </div>
+        <div id="calculator-list" class="calculator-list"></div>
+        <div id="empty-state" class="empty-state" hidden>
+          Nenhuma calculadora encontrada. Tente outro termo.
+        </div>
+      </aside>
+
+      <section id="calculator-panel" class="calculator-panel" aria-live="polite"></section>
+    </section>
+
+    <section class="decision-section">
+      <div>
+        <span class="section-kicker">Próxima fase</span>
+        <h2>De calculadora para ferramenta de decisão.</h2>
+      </div>
+      <div class="decision-grid">
+        <article>
+          <span>01</span>
+          <h3>À vista ou parcelado?</h3>
+          <p>Compare desconto, juros implícitos e custo de oportunidade.</p>
+        </article>
+        <article>
+          <span>02</span>
+          <h3>Amortizar ou investir?</h3>
+          <p>Coloque duas alternativas lado a lado e veja o impacto financeiro.</p>
+        </article>
+        <article>
+          <span>03</span>
+          <h3>Comprar ou alugar?</h3>
+          <p>Projete patrimônio, aluguel, financiamento e valorização.</p>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>Pythonzinho Calcula · MVP experimental. Resultados são estimativas e não constituem recomendação financeira.</p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
