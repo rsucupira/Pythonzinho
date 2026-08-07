@@ -4,28 +4,85 @@ Hub estático de calculadoras e simuladores online criado dentro do repositório
 
 ## O que está no MVP
 
-- Busca por calculadora/assunto
-- Interface responsiva para desktop e celular
-- 11 ferramentas funcionais:
-  - Juros compostos
-  - Financiamento (Price)
-  - Porcentagem
-  - Desconto
-  - Regra de três
-  - ROI
-  - Margem e markup
-  - Custo de combustível
-  - À vista ou parcelado?
-  - Amortizar ou investir?
-  - Quando atinjo minha meta de patrimônio?
-- Simuladores de decisão com comparação econômica entre alternativas
-- URLs amigáveis para SEO e compartilhamento
-- Cenários compartilháveis pela própria URL, sem banco de dados
-- Botão `Copiar link` em cada ferramenta
-- Gráficos SVG responsivos nas simulações de longo prazo
-- Metadados específicos por ferramenta (title, description, Open Graph e canonical)
-- `robots.txt`, página 404 real, regras `_redirects` e `_headers` para Cloudflare Pages
-- Zero dependência de backend: HTML + CSS + JavaScript
+- busca por calculadora/assunto;
+- interface responsiva para desktop e celular;
+- 11 ferramentas funcionais;
+- simuladores de decisão;
+- URLs amigáveis para SEO;
+- cenários compartilháveis pela query string;
+- botão `Copiar link`;
+- gráficos SVG responsivos;
+- metadados específicos por ferramenta;
+- `robots.txt`, `404.html`, `_redirects` e `_headers` para Cloudflare Pages;
+- testes automatizados no GitHub Actions;
+- zero backend e zero dependência JavaScript externa.
+
+## Ferramentas
+
+1. Juros compostos
+2. Financiamento Price
+3. Porcentagem
+4. Desconto
+5. Regra de três
+6. ROI
+7. Margem e markup
+8. Custo de combustível
+9. À vista ou parcelado?
+10. Amortizar ou investir?
+11. Quando atinjo minha meta de patrimônio?
+
+## Arquitetura do cálculo
+
+As fórmulas foram centralizadas em `formulas.js`. Esse módulo não depende do DOM e funciona tanto no navegador quanto no Node.js.
+
+A interface continua definida em `app.js` e `decisions.js`, enquanto `core-adapter.js` faz os resultados visuais consumirem o mesmo núcleo matemático usado pelos testes.
+
+Os gráficos também usam as séries geradas pelo núcleo:
+
+- `compoundSeries()` para juros compostos;
+- `priceSchedule()` para financiamento;
+- `targetSeries()` para meta de patrimônio.
+
+Isso reduz o risco de o número exibido e o gráfico utilizarem premissas diferentes.
+
+## Testes automatizados
+
+A suíte está em:
+
+```text
+calculadoras/tests/core.test.js
+```
+
+Ela cobre, entre outros pontos:
+
+- conversão de taxa anual para mensal;
+- juros compostos;
+- financiamento Price e saldo final zero;
+- porcentagem;
+- desconto;
+- regra de três;
+- ROI;
+- margem e markup;
+- custo de combustível;
+- à vista vs. parcelado;
+- amortizar vs. investir;
+- meta de patrimônio;
+- séries temporais usadas pelos gráficos;
+- serialização e restauração de cenários pela URL.
+
+Para rodar localmente, com Node.js 18+:
+
+```bash
+node --test calculadoras/tests/*.test.js
+```
+
+Para verificar apenas sintaxe:
+
+```bash
+for file in calculadoras/*.js; do node --check "$file"; done
+```
+
+O workflow `.github/workflows/calculadoras-tests.yml` executa automaticamente essas verificações em pushes e pull requests que alterem o MVP.
 
 ## URLs disponíveis
 
@@ -43,11 +100,9 @@ Após o deploy no Cloudflare Pages:
 - `/amortizar-ou-investir`
 - `/meta-de-patrimonio`
 
-Os antigos links por hash continuam sendo aceitos pelo JavaScript quando usados na home, mas a navegação passa a gravar a URL amigável no navegador.
+## Cenários compartilháveis
 
-## Compartilhamento de cenários
-
-`share.js` serializa os campos numéricos da ferramenta ativa na query string. Isso permite reconstruir a mesma simulação em outro navegador sem salvar dados no servidor.
+`scenario.js` concentra a codificação e leitura dos parâmetros. `share.js` cuida apenas da integração com o formulário e a área de transferência.
 
 Exemplo:
 
@@ -55,120 +110,71 @@ Exemplo:
 /juros-compostos?initial=10000&monthly=500&annualRate=10&years=15
 ```
 
-O comportamento é:
+Ao abrir esse endereço, a ferramenta é preenchida e recalculada. Alterar os campos atualiza a URL; `Copiar link` copia o cenário atual; `Limpar` restaura o padrão.
 
-1. ao abrir uma URL com parâmetros válidos, os campos são preenchidos automaticamente e o resultado é recalculado;
-2. ao alterar os campos, a URL do navegador é atualizada com pequeno debounce;
-3. o botão `Copiar link` copia a simulação atual completa;
-4. `Limpar` restaura os valores padrão e remove os parâmetros da URL.
-
-Os parâmetros não alteram o canonical da página. Para SEO, o canonical continua apontando somente para a rota principal da calculadora.
+O canonical continua apontando para a rota limpa, sem parâmetros.
 
 ## Gráficos
 
-`charts.js` gera SVG responsivo diretamente no navegador, sem Chart.js, D3 ou outra dependência externa.
+`charts.js` gera SVG diretamente no navegador, sem Chart.js ou D3.
 
 ### Juros compostos
 
-Mostra duas curvas ao longo do período:
-
 - patrimônio projetado;
-- capital efetivamente aportado.
-
-A distância entre as curvas ajuda a visualizar a parcela do patrimônio originada pelos rendimentos.
+- capital aportado.
 
 ### Financiamento Price
-
-Mostra:
 
 - saldo devedor;
 - amortização acumulada;
 - juros acumulados.
 
-O cronograma usa a mesma taxa mensal equivalente e a mesma parcela Price apresentadas no resultado numérico.
-
 ### Meta de patrimônio
-
-Mostra:
 
 - patrimônio projetado;
 - capital aportado;
-- linha horizontal da meta.
-
-A visualização acompanha os valores carregados por uma URL compartilhada e é redesenhada quando os campos mudam.
-
-## Simuladores de decisão
-
-### À vista ou parcelado?
-
-Compara o preço à vista com o valor presente das parcelas usando uma taxa de retorno alternativa informada pelo usuário. Também exibe o total nominal parcelado e o ágio em relação ao preço à vista.
-
-### Amortizar ou investir?
-
-Compara, de forma simplificada, o benefício econômico de reduzir uma dívida com o valor futuro esperado de um investimento para o mesmo capital e horizonte.
-
-### Quando atinjo minha meta?
-
-Projeta o número de meses necessário para atingir um patrimônio-alvo a partir do patrimônio atual, aporte mensal e retorno anual esperado.
+- linha da meta.
 
 ## Rodar localmente
-
-Para testar a home e os cálculos:
 
 ```bash
 cd calculadoras
 python -m http.server 8000
 ```
 
-Depois acesse `http://localhost:8000`.
+Acesse `http://localhost:8000`.
 
-As URLs amigáveis usam as regras do Cloudflare Pages. Um servidor HTTP local simples não interpreta `_redirects`; para testar essas rotas localmente, use o ambiente de preview/deploy do Pages ou uma ferramenta compatível com essas regras.
+Um servidor HTTP simples não interpreta `_redirects`; as URLs amigáveis completas devem ser validadas no preview/deploy do Cloudflare Pages.
 
 ## Deploy no Cloudflare Pages
 
-Conecte o repositório `rsucupira/Pythonzinho` e use:
+Use o repositório `rsucupira/Pythonzinho` com:
 
-- Branch de produção: `master` depois do merge do PR (ou `mvp-calculadoras` para um preview controlado)
-- Framework preset: `None`
-- Build command: vazio
-- Build output directory: `calculadoras`
-
-A pasta de saída já contém `_redirects` e `_headers`. As 11 URLs são encaminhadas internamente para o mesmo `index.html`, mantendo uma única implementação do motor das calculadoras.
-
-O arquivo `404.html` evita que caminhos desconhecidos sejam tratados como páginas válidas.
+- Branch de produção: `master` depois do merge do PR;
+- Framework preset: `None`;
+- Build command: vazio;
+- Build output directory: `calculadoras`.
 
 ## SEO
 
-`routing.js` adapta, conforme a URL acessada:
+`routing.js` adapta por rota:
 
-- `<title>`
-- meta description
-- canonical absoluto usando o domínio atual
-- Open Graph
-- Twitter metadata
-- título e introdução visual da página
+- `<title>`;
+- meta description;
+- canonical;
+- Open Graph;
+- Twitter metadata;
+- título e introdução visual.
 
-O arquivo `_headers` também envia canonical por HTTP para as rotas conhecidas.
-
-### Sitemap
-
-Existe `sitemap.template.xml` com todas as 12 URLs (home + 11 ferramentas). Quando o domínio final estiver definido:
-
-1. substitua `{{BASE_URL}}` pelo domínio, sem barra final;
-2. renomeie/copie o arquivo para `sitemap.xml`;
-3. acrescente ao `robots.txt` a linha `Sitemap: https://SEU-DOMINIO/sitemap.xml`;
-4. envie o sitemap ao Google Search Console e Bing Webmaster Tools.
-
-O sitemap não é ativado antes do domínio final para evitar publicar URLs canônicas incorretas.
+Existe `sitemap.template.xml` com home + 11 ferramentas. Quando o domínio final estiver definido, substitua `{{BASE_URL}}`, publique como `sitemap.xml`, referencie no `robots.txt` e envie ao Google Search Console/Bing Webmaster Tools.
 
 ## Próximos passos sugeridos
 
-1. Publicar o preview no Cloudflare Pages.
-2. Conectar o domínio/subdomínio definitivo e ativar `sitemap.xml`.
-3. Adicionar testes automatizados das fórmulas, gráficos e parâmetros compartilháveis.
-4. Criar o simulador `comprar ou alugar`.
-5. Criar comparações lado a lado entre cenários salvos na URL.
-6. Integrar APIs apenas para dados que realmente precisam ser atuais (CDI, inflação, cotações etc.).
+1. Publicar o primeiro preview no Cloudflare Pages.
+2. Conectar domínio/subdomínio e ativar `sitemap.xml`.
+3. Criar o simulador `comprar ou alugar`.
+4. Criar comparação lado a lado entre cenários.
+5. Integrar APIs apenas para dados realmente atuais, como CDI e inflação.
 
 ## Aviso
 
