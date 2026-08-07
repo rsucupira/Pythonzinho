@@ -38,6 +38,7 @@
   display: inline-block;
   border-top: 2px solid currentColor;
 }
+.chart-legend i.chart-line-dashed { border-top-style: dashed; }
 .chart-scroll { margin-top: 16px; overflow-x: auto; }
 .scenario-chart { width: 100%; min-width: 580px; height: auto; display: block; }
 .chart-grid { stroke: rgba(255,255,255,.07); stroke-width: 1; }
