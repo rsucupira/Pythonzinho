@@ -12,9 +12,10 @@ Hub estático de calculadoras e simuladores online criado dentro do repositório
 - cenários compartilháveis pela query string;
 - comparação Cenário A × Cenário B;
 - gráficos SVG responsivos;
-- análise de sensibilidade em Comprar × Alugar e Amortizar × Investir;
+- análise de sensibilidade em Comprar × Alugar, Amortizar × Investir e À Vista × Parcelado;
 - custos imobiliários detalhados opcionais;
 - presets ilustrativos Conservador / Base / Otimista;
+- Resumo da Decisão copiável e imprimível;
 - testes automatizados no GitHub Actions;
 - zero backend e zero dependência JavaScript externa.
 
@@ -53,7 +54,7 @@ Exemplo:
 
 ## Presets ilustrativos de cenário
 
-`presets-core.js` concentra três perfis reutilizáveis e testáveis. `presets.js` os aplica aos formulários A e B.
+`presets-core.js` concentra três perfis reutilizáveis e testáveis. `presets.js` os aplica aos formulários A e B quando a ferramenta suporta o recurso.
 
 ### Conservador
 
@@ -72,7 +73,21 @@ Exemplo:
 
 Esses perfis são **cenários ilustrativos**, não previsões de mercado. Eles não alteram automaticamente taxas contratuais como `mortgageRate` ou `debtRate`.
 
-Como os presets escrevem diretamente nos campos existentes e disparam o mesmo fluxo da calculadora, resultado, gráfico, sensibilidade e URL são atualizados juntos.
+## À vista ou parcelado — sensibilidade
+
+`cash-sensitivity-core.js` usa diretamente `cashVsInstallments()` e responde três perguntas de ponto de equilíbrio:
+
+- **preço à vista de equilíbrio**: preço que iguala o valor presente das parcelas;
+- **parcela de equilíbrio**: valor máximo/mínimo da parcela que mantém equivalência com o preço à vista nas premissas atuais;
+- **retorno alternativo de equilíbrio**: rentabilidade em que o custo de oportunidade torna as duas alternativas equivalentes.
+
+O painel também mostra uma matriz 5 × 5 de preço à vista × retorno alternativo.
+
+No cenário padrão do MVP (R$ 4.500 à vista ou 12 × R$ 450, retorno alternativo de 10% a.a.), os testes encontram aproximadamente:
+
+- preço à vista de equilíbrio: **R$ 5.130,22**;
+- parcela de equilíbrio: **R$ 394,72**;
+- retorno alternativo de equilíbrio: **41,30% a.a.**.
 
 ## Amortizar ou investir — sensibilidade
 
@@ -85,7 +100,7 @@ O painel mostra:
 - diferença atual em pontos percentuais;
 - matriz 5 × 5 de custo da dívida × retorno esperado.
 
-No modelo simplificado atual, o equilíbrio ocorre quando as taxas efetivas anuais se igualam. Exemplo: dívida a 14% a.a. exige retorno de 14% a.a. para o investimento empatar antes de impostos, risco e liquidez.
+No modelo simplificado atual, o equilíbrio ocorre quando as taxas efetivas anuais se igualam.
 
 ## Comprar ou alugar
 
@@ -136,6 +151,34 @@ No cenário padrão sem custos detalhados adicionais, os testes encontram aproxi
 - valorização de equilíbrio: **6,38% a.a.**;
 - aluguel inicial de equilíbrio: **R$ 3.225/mês**.
 
+## Resumo da Decisão
+
+`decision-report.js` adiciona uma seção consolidada às ferramentas mais analíticas:
+
+- Juros compostos;
+- Financiamento Price;
+- À vista × parcelado;
+- Amortizar × investir;
+- Meta de patrimônio;
+- Comprar × alugar.
+
+O resumo reúne:
+
+- resultado principal e métricas;
+- premissas do Cenário A;
+- pontos de equilíbrio/sensibilidade disponíveis;
+- resultado e premissas do Cenário B quando ativo;
+- URL exata do cenário;
+- nota metodológica da ferramenta.
+
+### Copiar resumo
+
+O botão `Copiar resumo` produz texto simples com resultado, métricas, premissas, thresholds e link. Isso permite enviar a análise por e-mail, WhatsApp ou outro canal sem backend.
+
+### Imprimir / salvar PDF
+
+O botão `Imprimir / salvar PDF` cria temporariamente uma versão limpa do resumo e chama a impressão nativa do navegador. O usuário pode imprimir ou escolher **Salvar como PDF**. O layout de impressão não inclui menus, busca ou campos de edição.
+
 ## Arquitetura
 
 Principais módulos:
@@ -150,7 +193,9 @@ Principais módulos:
 - `charts.js`: gráficos SVG;
 - `sensitivity-core.js` / `sensitivity.js`: sensibilidade imobiliária;
 - `amortization-sensitivity-core.js` / `amortization-sensitivity.js`: sensibilidade de amortização;
+- `cash-sensitivity-core.js` / `cash-sensitivity.js`: sensibilidade à vista × parcelado;
 - `presets-core.js` / `presets.js`: cenários ilustrativos;
+- `decision-report.js`: resumo, cópia e impressão;
 - `scenario.js` + `share.js`: serialização e compartilhamento.
 
 ## Testes automatizados
@@ -161,8 +206,9 @@ As suítes em `calculadoras/tests/` cobrem:
 - URLs e Cenário A/B;
 - Comprar × Alugar;
 - custos imobiliários;
-- sensibilidade e pontos de equilíbrio;
+- sensibilidade imobiliária;
 - Amortizar × Investir e sua matriz;
+- À Vista × Parcelado, thresholds e matriz;
 - presets e garantia de não alterar taxas contratuais.
 
 Para rodar localmente:
@@ -221,8 +267,8 @@ Um servidor HTTP simples não interpreta `_redirects`; as rotas amigáveis compl
 
 1. Publicar o primeiro preview no Cloudflare Pages.
 2. Conectar domínio/subdomínio e ativar `sitemap.xml`.
-3. Criar análise de sensibilidade para À Vista × Parcelado.
-4. Criar um painel-resumo de premissas e decisões para impressão/PDF.
+3. Criar análise de sensibilidade para Financiamento Price.
+4. Criar uma tela inicial focada em perguntas/decisões, não em nomes de calculadoras.
 5. Integrar APIs somente para dados realmente atuais, como CDI e inflação.
 
 ## Aviso
