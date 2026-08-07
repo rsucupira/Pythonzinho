@@ -6,7 +6,7 @@ Hub estático de calculadoras e simuladores online criado dentro do repositório
 
 - busca por calculadora/assunto;
 - interface responsiva para desktop e celular;
-- 11 ferramentas funcionais;
+- 12 ferramentas funcionais;
 - simuladores de decisão;
 - URLs amigáveis para SEO;
 - cenários compartilháveis pela query string;
@@ -30,20 +30,37 @@ Hub estático de calculadoras e simuladores online criado dentro do repositório
 9. À vista ou parcelado?
 10. Amortizar ou investir?
 11. Quando atinjo minha meta de patrimônio?
+12. Comprar imóvel ou alugar e investir?
+
+## Comprar ou alugar
+
+O simulador `/comprar-ou-alugar` compara o patrimônio líquido das duas estratégias no horizonte informado.
+
+Premissas principais:
+
+- a entrada disponível é usada na compra ou investida por quem aluga;
+- o financiamento usa tabela Price;
+- imóvel e aluguel podem crescer por taxas anuais diferentes;
+- a carteira usa o retorno anual informado;
+- custos recorrentes do proprietário são informados como percentual anual do valor do imóvel;
+- a cada mês, as duas alternativas usam o mesmo orçamento habitacional e a opção com menor custo investe a diferença.
+
+O resultado mostra patrimônio final em cada alternativa, valor do imóvel, saldo devedor, parcela inicial e aluguel final. O gráfico mostra a evolução de `Comprar` versus `Alugar + investir`.
+
+Não estão incluídos no MVP custos de compra/venda, cartório, corretagem, impostos sobre investimentos, CET detalhado, tributação ou particularidades contratuais.
 
 ## Arquitetura do cálculo
 
 As fórmulas foram centralizadas em `formulas.js`. Esse módulo não depende do DOM e funciona tanto no navegador quanto no Node.js.
 
-A interface continua definida em `app.js` e `decisions.js`, enquanto `core-adapter.js` faz os resultados visuais consumirem o mesmo núcleo matemático usado pelos testes.
+A interface base está em `app.js` e `decisions.js`; `housing.js` registra o simulador imobiliário; `core-adapter.js` faz as calculadoras originais consumirem o núcleo testado.
 
-Os gráficos também usam as séries geradas pelo núcleo:
+Os gráficos usam séries geradas pelo mesmo núcleo:
 
 - `compoundSeries()` para juros compostos;
 - `priceSchedule()` para financiamento;
-- `targetSeries()` para meta de patrimônio.
-
-Isso reduz o risco de o número exibido e o gráfico utilizarem premissas diferentes.
+- `targetSeries()` para meta de patrimônio;
+- `buyVsRentSeries()` para comprar vs. alugar.
 
 ## Testes automatizados
 
@@ -58,15 +75,12 @@ Ela cobre, entre outros pontos:
 - conversão de taxa anual para mensal;
 - juros compostos;
 - financiamento Price e saldo final zero;
-- porcentagem;
-- desconto;
-- regra de três;
-- ROI;
-- margem e markup;
-- custo de combustível;
+- porcentagem, desconto e regra de três;
+- ROI, margem/markup e combustível;
 - à vista vs. parcelado;
 - amortizar vs. investir;
 - meta de patrimônio;
+- comprar vs. alugar;
 - séries temporais usadas pelos gráficos;
 - serialização e restauração de cenários pela URL.
 
@@ -99,10 +113,11 @@ Após o deploy no Cloudflare Pages:
 - `/avista-ou-parcelado`
 - `/amortizar-ou-investir`
 - `/meta-de-patrimonio`
+- `/comprar-ou-alugar`
 
 ## Cenários compartilháveis
 
-`scenario.js` concentra a codificação e leitura dos parâmetros. `share.js` cuida apenas da integração com o formulário e a área de transferência.
+`scenario.js` concentra a codificação e leitura dos parâmetros. `share.js` cuida da integração com o formulário e a área de transferência.
 
 Exemplo:
 
@@ -110,7 +125,7 @@ Exemplo:
 /juros-compostos?initial=10000&monthly=500&annualRate=10&years=15
 ```
 
-Ao abrir esse endereço, a ferramenta é preenchida e recalculada. Alterar os campos atualiza a URL; `Copiar link` copia o cenário atual; `Limpar` restaura o padrão.
+Ao abrir um endereço compartilhado, a ferramenta é preenchida e recalculada. Alterar os campos atualiza a URL; `Copiar link` copia o cenário atual; `Limpar` restaura o padrão.
 
 O canonical continua apontando para a rota limpa, sem parâmetros.
 
@@ -118,22 +133,10 @@ O canonical continua apontando para a rota limpa, sem parâmetros.
 
 `charts.js` gera SVG diretamente no navegador, sem Chart.js ou D3.
 
-### Juros compostos
-
-- patrimônio projetado;
-- capital aportado.
-
-### Financiamento Price
-
-- saldo devedor;
-- amortização acumulada;
-- juros acumulados.
-
-### Meta de patrimônio
-
-- patrimônio projetado;
-- capital aportado;
-- linha da meta.
+- Juros compostos: patrimônio projetado × capital aportado.
+- Financiamento Price: saldo devedor × amortização × juros.
+- Meta de patrimônio: patrimônio × capital aportado × meta.
+- Comprar vs. alugar: patrimônio líquido da compra × carteira de aluguel + investimento.
 
 ## Rodar localmente
 
@@ -157,23 +160,16 @@ Use o repositório `rsucupira/Pythonzinho` com:
 
 ## SEO
 
-`routing.js` adapta por rota:
+`routing.js` adapta por rota `<title>`, description, canonical, Open Graph, Twitter metadata e o conteúdo principal.
 
-- `<title>`;
-- meta description;
-- canonical;
-- Open Graph;
-- Twitter metadata;
-- título e introdução visual.
-
-Existe `sitemap.template.xml` com home + 11 ferramentas. Quando o domínio final estiver definido, substitua `{{BASE_URL}}`, publique como `sitemap.xml`, referencie no `robots.txt` e envie ao Google Search Console/Bing Webmaster Tools.
+Existe `sitemap.template.xml` com home + 12 ferramentas. Quando o domínio final estiver definido, substitua `{{BASE_URL}}`, publique como `sitemap.xml`, referencie no `robots.txt` e envie ao Google Search Console/Bing Webmaster Tools.
 
 ## Próximos passos sugeridos
 
 1. Publicar o primeiro preview no Cloudflare Pages.
 2. Conectar domínio/subdomínio e ativar `sitemap.xml`.
-3. Criar o simulador `comprar ou alugar`.
-4. Criar comparação lado a lado entre cenários.
+3. Criar comparação lado a lado entre cenários.
+4. Adicionar custos opcionais mais detalhados ao simulador imobiliário.
 5. Integrar APIs apenas para dados realmente atuais, como CDI e inflação.
 
 ## Aviso
