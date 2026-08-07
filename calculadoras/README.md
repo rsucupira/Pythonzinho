@@ -12,7 +12,7 @@ Hub estático de calculadoras e simuladores online criado dentro do repositório
 - cenários compartilháveis pela query string;
 - comparação Cenário A × Cenário B;
 - gráficos SVG responsivos;
-- análise de sensibilidade em Comprar × Alugar, Amortizar × Investir e À Vista × Parcelado;
+- análise de sensibilidade em Financiamento Price, Comprar × Alugar, Amortizar × Investir e À Vista × Parcelado;
 - custos imobiliários detalhados opcionais;
 - presets ilustrativos Conservador / Base / Otimista;
 - Resumo da Decisão copiável e imprimível;
@@ -52,6 +52,29 @@ Exemplo:
 /juros-compostos?initial=10000&monthly=500&annualRate=10&years=15&compare=1&b_initial=20000&b_monthly=800&b_annualRate=12&b_years=20
 ```
 
+## Financiamento Price — parcela-alvo e sensibilidade
+
+`financing-enhancement.js` acrescenta **Parcela-alvo** como premissa normal do financiamento. Por ser um campo da própria calculadora, ele funciona com Cenário A/B e URL compartilhável.
+
+`financing-sensitivity-core.js` usa exclusivamente `priceFinancing()` do núcleo matemático e responde:
+
+- **taxa máxima** que mantém a parcela abaixo ou igual ao alvo;
+- **valor financiado máximo** compatível com o alvo;
+- **redução do principal / entrada adicional equivalente** necessária;
+- **prazo mínimo** necessário para atingir a parcela-alvo;
+- impacto de **+1 ponto percentual** na taxa sobre parcela e juros totais;
+- matriz 5 × 5 de **taxa anual × prazo**, com indicação visual das combinações dentro ou acima da parcela-alvo.
+
+No cenário padrão — R$100.000 financiados, 12% a.a., 48 meses e parcela-alvo de R$2.500 — os testes encontram aproximadamente:
+
+- parcela atual: **R$2.603,36**;
+- taxa máxima para o alvo: **9,64% a.a.**;
+- principal máximo: **R$96.029,58**;
+- redução necessária do principal: **R$3.970,42**;
+- prazo mínimo: **51 meses**.
+
+O cálculo continua sem CET, seguros, tarifas e outras cobranças institucionais.
+
 ## Presets ilustrativos de cenário
 
 `presets-core.js` concentra três perfis reutilizáveis e testáveis. `presets.js` os aplica aos formulários A e B quando a ferramenta suporta o recurso.
@@ -77,9 +100,9 @@ Esses perfis são **cenários ilustrativos**, não previsões de mercado. Eles n
 
 `cash-sensitivity-core.js` usa diretamente `cashVsInstallments()` e responde três perguntas de ponto de equilíbrio:
 
-- **preço à vista de equilíbrio**: preço que iguala o valor presente das parcelas;
-- **parcela de equilíbrio**: valor máximo/mínimo da parcela que mantém equivalência com o preço à vista nas premissas atuais;
-- **retorno alternativo de equilíbrio**: rentabilidade em que o custo de oportunidade torna as duas alternativas equivalentes.
+- **preço à vista de equilíbrio**;
+- **parcela de equilíbrio**;
+- **retorno alternativo de equilíbrio**.
 
 O painel também mostra uma matriz 5 × 5 de preço à vista × retorno alternativo.
 
@@ -162,22 +185,15 @@ No cenário padrão sem custos detalhados adicionais, os testes encontram aproxi
 - Meta de patrimônio;
 - Comprar × alugar.
 
-O resumo reúne:
-
-- resultado principal e métricas;
-- premissas do Cenário A;
-- pontos de equilíbrio/sensibilidade disponíveis;
-- resultado e premissas do Cenário B quando ativo;
-- URL exata do cenário;
-- nota metodológica da ferramenta.
+O resumo reúne resultado, métricas, premissas do Cenário A, pontos de equilíbrio, Cenário B quando ativo, URL exata e nota metodológica. No financiamento, os thresholds de taxa, principal, prazo e impacto de +1 p.p. entram automaticamente no resumo.
 
 ### Copiar resumo
 
-O botão `Copiar resumo` produz texto simples com resultado, métricas, premissas, thresholds e link. Isso permite enviar a análise por e-mail, WhatsApp ou outro canal sem backend.
+O botão `Copiar resumo` produz texto simples com resultado, métricas, premissas, thresholds e link.
 
 ### Imprimir / salvar PDF
 
-O botão `Imprimir / salvar PDF` cria temporariamente uma versão limpa do resumo e chama a impressão nativa do navegador. O usuário pode imprimir ou escolher **Salvar como PDF**. O layout de impressão não inclui menus, busca ou campos de edição.
+O botão `Imprimir / salvar PDF` cria temporariamente uma versão limpa do resumo e chama a impressão nativa do navegador. O usuário pode imprimir ou escolher **Salvar como PDF**.
 
 ## Arquitetura
 
@@ -186,6 +202,8 @@ Principais módulos:
 - `formulas.js`: fórmulas e séries temporais;
 - `app.js`: interface base;
 - `decisions.js`: simuladores de decisão;
+- `financing-enhancement.js`: parcela-alvo do financiamento;
+- `financing-sensitivity-core.js` / `financing-sensitivity.js`: thresholds e matriz Price;
 - `housing.js`: Comprar × Alugar;
 - `housing-costs.js`: custos imobiliários opcionais;
 - `core-adapter.js`: integração do núcleo testável;
@@ -204,6 +222,7 @@ As suítes em `calculadoras/tests/` cobrem:
 
 - fórmulas principais e séries;
 - URLs e Cenário A/B;
+- Financiamento Price, parcela-alvo, taxa/principal/prazo de equilíbrio e matriz;
 - Comprar × Alugar;
 - custos imobiliários;
 - sensibilidade imobiliária;
@@ -267,8 +286,8 @@ Um servidor HTTP simples não interpreta `_redirects`; as rotas amigáveis compl
 
 1. Publicar o primeiro preview no Cloudflare Pages.
 2. Conectar domínio/subdomínio e ativar `sitemap.xml`.
-3. Criar análise de sensibilidade para Financiamento Price.
-4. Criar uma tela inicial focada em perguntas/decisões, não em nomes de calculadoras.
+3. Criar uma tela inicial focada em perguntas/decisões, não em nomes de calculadoras.
+4. Adicionar comparação visual de múltiplos cenários salvos.
 5. Integrar APIs somente para dados realmente atuais, como CDI e inflação.
 
 ## Aviso
