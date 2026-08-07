@@ -1,0 +1,31 @@
+.decision-grid button {
+  margin-top: 18px;
+  padding: 10px 0;
+  border: 0;
+  color: var(--accent);
+  background: transparent;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.decision-grid button:hover {
+  transform: translateX(3px);
+}
+
+.decision-grid article {
+  transition: border-color .2s ease, background .2s ease, transform .2s ease;
+}
+
+.decision-grid article:hover {
+  border-color: rgba(124,242,200,.24);
+  background: rgba(124,242,200,.035);
+  transform: translateY(-2px);
+}
+
+@media (max-width: 620px) {
+  .result-main {
+    font-size: clamp(30px, 10vw, 42px);
+  }
+}
