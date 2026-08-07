@@ -22,6 +22,7 @@ Hub estático de calculadoras e simuladores online criado dentro do repositório
 - URLs amigáveis para SEO e compartilhamento
 - Cenários compartilháveis pela própria URL, sem banco de dados
 - Botão `Copiar link` em cada ferramenta
+- Gráficos SVG responsivos nas simulações de longo prazo
 - Metadados específicos por ferramenta (title, description, Open Graph e canonical)
 - `robots.txt`, página 404 real, regras `_redirects` e `_headers` para Cloudflare Pages
 - Zero dependência de backend: HTML + CSS + JavaScript
@@ -62,6 +63,39 @@ O comportamento é:
 4. `Limpar` restaura os valores padrão e remove os parâmetros da URL.
 
 Os parâmetros não alteram o canonical da página. Para SEO, o canonical continua apontando somente para a rota principal da calculadora.
+
+## Gráficos
+
+`charts.js` gera SVG responsivo diretamente no navegador, sem Chart.js, D3 ou outra dependência externa.
+
+### Juros compostos
+
+Mostra duas curvas ao longo do período:
+
+- patrimônio projetado;
+- capital efetivamente aportado.
+
+A distância entre as curvas ajuda a visualizar a parcela do patrimônio originada pelos rendimentos.
+
+### Financiamento Price
+
+Mostra:
+
+- saldo devedor;
+- amortização acumulada;
+- juros acumulados.
+
+O cronograma usa a mesma taxa mensal equivalente e a mesma parcela Price apresentadas no resultado numérico.
+
+### Meta de patrimônio
+
+Mostra:
+
+- patrimônio projetado;
+- capital aportado;
+- linha horizontal da meta.
+
+A visualização acompanha os valores carregados por uma URL compartilhada e é redesenhada quando os campos mudam.
 
 ## Simuladores de decisão
 
@@ -131,9 +165,9 @@ O sitemap não é ativado antes do domínio final para evitar publicar URLs can�
 
 1. Publicar o preview no Cloudflare Pages.
 2. Conectar o domínio/subdomínio definitivo e ativar `sitemap.xml`.
-3. Adicionar gráficos nas simulações de longo prazo.
-4. Adicionar testes automatizados das fórmulas e dos parâmetros compartilháveis.
-5. Criar o simulador `comprar ou alugar`.
+3. Adicionar testes automatizados das fórmulas, gráficos e parâmetros compartilháveis.
+4. Criar o simulador `comprar ou alugar`.
+5. Criar comparações lado a lado entre cenários salvos na URL.
 6. Integrar APIs apenas para dados que realmente precisam ser atuais (CDI, inflação, cotações etc.).
 
 ## Aviso
