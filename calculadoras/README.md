@@ -10,13 +10,11 @@ Hub estático de calculadoras e simuladores online criado dentro do repositório
 - simuladores de decisão;
 - URLs amigáveis para SEO;
 - cenários compartilháveis pela query string;
-- comparação Cenário A × Cenário B nas simulações de longo prazo;
-- análise de sensibilidade e pontos de equilíbrio em Comprar × Alugar;
-- custos imobiliários detalhados opcionais com presets;
-- botão `Copiar link`;
+- comparação Cenário A × Cenário B;
 - gráficos SVG responsivos;
-- metadados específicos por ferramenta;
-- `robots.txt`, `404.html`, `_redirects` e `_headers` para Cloudflare Pages;
+- análise de sensibilidade em Comprar × Alugar e Amortizar × Investir;
+- custos imobiliários detalhados opcionais;
+- presets ilustrativos Conservador / Base / Otimista;
 - testes automatizados no GitHub Actions;
 - zero backend e zero dependência JavaScript externa.
 
@@ -41,14 +39,11 @@ Hub estático de calculadoras e simuladores online criado dentro do repositório
 
 - Juros compostos;
 - Financiamento Price;
+- Amortizar ou investir;
 - Meta de patrimônio;
 - Comprar ou alugar.
 
-O Cenário B começa com os valores do A, pode ser alterado campo a campo e pode ter horizonte diferente. Os gráficos passam automaticamente para o modo comparativo.
-
-### Compartilhamento da comparação
-
-O link completo preserva os dois cenários. O A usa os parâmetros normais e o B usa prefixo `b_`, além de `compare=1`.
+O Cenário B começa com os valores do A e pode ser alterado campo a campo. Quando há gráfico temporal compatível, as curvas são sobrepostas automaticamente. O B é preservado na URL com prefixo `b_` e `compare=1`.
 
 Exemplo:
 
@@ -56,11 +51,45 @@ Exemplo:
 /juros-compostos?initial=10000&monthly=500&annualRate=10&years=15&compare=1&b_initial=20000&b_monthly=800&b_annualRate=12&b_years=20
 ```
 
-Abrir esse endereço reconstrói a comparação. Alterações no Cenário A preservam os parâmetros do B, e `Copiar link` copia o estado completo.
+## Presets ilustrativos de cenário
+
+`presets-core.js` concentra três perfis reutilizáveis e testáveis. `presets.js` os aplica aos formulários A e B.
+
+### Conservador
+
+- juros compostos / meta / retorno alternativo / amortizar: retorno de 6% a.a.;
+- comprar × alugar: valorização do imóvel de 2% a.a., investimento de 6% a.a. e reajuste do aluguel de 4% a.a.
+
+### Base
+
+- juros compostos / meta / retorno alternativo / amortizar: retorno de 10% a.a.;
+- comprar × alugar: valorização do imóvel de 4% a.a., investimento de 10% a.a. e reajuste do aluguel de 4% a.a.
+
+### Otimista
+
+- juros compostos / meta / retorno alternativo / amortizar: retorno de 12% a.a.;
+- comprar × alugar: valorização do imóvel de 6% a.a., investimento de 12% a.a. e reajuste do aluguel de 4% a.a.
+
+Esses perfis são **cenários ilustrativos**, não previsões de mercado. Eles não alteram automaticamente taxas contratuais como `mortgageRate` ou `debtRate`.
+
+Como os presets escrevem diretamente nos campos existentes e disparam o mesmo fluxo da calculadora, resultado, gráfico, sensibilidade e URL são atualizados juntos.
+
+## Amortizar ou investir — sensibilidade
+
+`amortization-sensitivity-core.js` usa o mesmo `amortizeVsInvest()` do núcleo matemático.
+
+O painel mostra:
+
+- retorno mínimo do investimento para empatar com a amortização;
+- custo da dívida em que investir e amortizar empatam;
+- diferença atual em pontos percentuais;
+- matriz 5 × 5 de custo da dívida × retorno esperado.
+
+No modelo simplificado atual, o equilíbrio ocorre quando as taxas efetivas anuais se igualam. Exemplo: dívida a 14% a.a. exige retorno de 14% a.a. para o investimento empatar antes de impostos, risco e liquidez.
 
 ## Comprar ou alugar
 
-A rota `/comprar-ou-alugar` compara o patrimônio líquido das duas estratégias no horizonte informado.
+A rota `/comprar-ou-alugar` compara patrimônio líquido da compra com aluguel + investimento usando orçamento habitacional mensal equivalente.
 
 Premissas centrais:
 
@@ -69,19 +98,14 @@ Premissas centrais:
 - aluguel e reajuste;
 - valorização do imóvel;
 - retorno dos investimentos;
-- custo anual consolidado do proprietário;
-- horizonte da análise;
-- orçamento habitacional mensal equivalente.
-
-A cada mês, a alternativa com menor custo habitacional investe a diferença. Isso evita favorecer artificialmente uma estratégia apenas porque sua saída mensal começa menor.
+- custos recorrentes do proprietário;
+- horizonte da análise.
 
 ## Custos imobiliários detalhados
 
-Os custos detalhados começam em **zero** para preservar a compatibilidade de cenários antigos e ficam recolhidos em um bloco opcional no formulário.
+Os componentes começam em zero para preservar compatibilidade com cenários antigos. O usuário pode informar:
 
-O usuário pode informar:
-
-- ITBI + cartório + registro como percentual do imóvel;
+- ITBI + cartório + registro;
 - corretagem/custos de venda;
 - IPTU anual;
 - manutenção anual;
@@ -89,79 +113,59 @@ O usuário pode informar:
 - condomínio extraordinário mensal;
 - imposto simplificado sobre ganhos positivos da carteira.
 
-### Tratamento econômico
+`housing-costs.js` oferece dois atalhos editáveis:
 
-- custos iniciais de compra são considerados caixa efetivamente consumido pelo comprador;
-- o cenário de aluguel recebe esse mesmo caixa como investimento inicial, mantendo igualdade de recursos;
-- custos de venda reduzem o valor líquido do imóvel no horizonte analisado;
-- custos recorrentes entram no orçamento mensal do proprietário;
-- a tributação simplificada incide somente sobre ganho positivo estimado da carteira na hipótese de liquidação.
+- **Aplicar referência detalhada**: 4,5% aquisição, 5% venda, IPTU 0,6%, manutenção 0,8%, seguro R$100/mês, condomínio extraordinário R$150/mês e imposto simplificado 15%;
+- **Usar consolidado 1,5%**: mantém apenas o custo anual consolidado.
 
-### Presets
+Os números são referências de modelagem, não tabela oficial de custos.
 
-`housing-costs.js` adiciona dois atalhos:
+## Comprar ou alugar — sensibilidade
 
-- **Aplicar referência detalhada**: exemplo editável com 4,5% de aquisição, 5% de venda, IPTU 0,6%, manutenção 0,8%, seguro R$100/mês, condomínio extraordinário R$150/mês e imposto simplificado de 15%;
-- **Usar consolidado 1,5%**: mantém apenas o custo anual consolidado e zera os componentes detalhados.
+`sensitivity-core.js` calcula com o mesmo `buyVsRentProjection()`:
 
-Esses valores são apenas uma referência de modelagem, não uma tabela oficial de impostos, taxas ou custos imobiliários.
+- valorização anual de equilíbrio do imóvel;
+- aluguel inicial de equilíbrio;
+- matriz 5 × 5 de valorização × retorno de investimentos;
+- threshold equivalente sem custos detalhados, quando esses custos estão ativos.
 
-Como os componentes fazem parte de `calc.fields`, eles funcionam automaticamente com:
+O solver faz varredura + bisseção e informa `fora da faixa` quando não encontra cruzamento.
 
-- Cenário A;
-- Cenário B;
-- `Copiar link`;
-- restauração pela URL;
-- gráficos;
-- análise de sensibilidade.
+No cenário padrão sem custos detalhados adicionais, os testes encontram aproximadamente:
 
-## Sensibilidade e pontos de equilíbrio
-
-`sensitivity-core.js` usa o mesmo `buyVsRentProjection()` para procurar mudanças de decisão sem duplicar a lógica do simulador.
-
-O painel calcula automaticamente:
-
-- **valorização anual de equilíbrio do imóvel**;
-- **aluguel mensal inicial de equilíbrio**;
-- **matriz 5 × 5** de valorização do imóvel × retorno dos investimentos.
-
-O solver faz varredura da faixa e depois bisseção no cruzamento encontrado. Se não houver cruzamento, informa `fora da faixa` em vez de extrapolar um número artificial.
-
-Quando custos detalhados estão ativos, os cards mostram também o threshold equivalente **sem custos detalhados**, permitindo visualizar quanto os custos de transação/posse deslocam a decisão.
-
-Com o cenário padrão sem custos detalhados adicionais, os testes de regressão encontram aproximadamente:
-
-- valorização do imóvel de equilíbrio: **6,38% a.a.**;
+- valorização de equilíbrio: **6,38% a.a.**;
 - aluguel inicial de equilíbrio: **R$ 3.225/mês**.
 
-Esses números mudam com qualquer premissa do Cenário A, inclusive os novos custos.
+## Arquitetura
 
-## Arquitetura do cálculo
+Principais módulos:
 
-As fórmulas ficam em `formulas.js`, sem dependência do DOM e reutilizáveis no navegador e no Node.js.
-
-Outros módulos principais:
-
+- `formulas.js`: fórmulas e séries temporais;
 - `app.js`: interface base;
 - `decisions.js`: simuladores de decisão;
-- `housing.js`: registro do simulador imobiliário;
-- `housing-costs.js`: painel e presets de custos;
-- `core-adapter.js`: integração das calculadoras originais com o núcleo;
+- `housing.js`: Comprar × Alugar;
+- `housing-costs.js`: custos imobiliários opcionais;
+- `core-adapter.js`: integração do núcleo testável;
 - `compare.js`: Cenário B;
 - `charts.js`: gráficos SVG;
-- `sensitivity-core.js`: solver puro;
-- `sensitivity.js`: apresentação da sensibilidade;
+- `sensitivity-core.js` / `sensitivity.js`: sensibilidade imobiliária;
+- `amortization-sensitivity-core.js` / `amortization-sensitivity.js`: sensibilidade de amortização;
+- `presets-core.js` / `presets.js`: cenários ilustrativos;
 - `scenario.js` + `share.js`: serialização e compartilhamento.
 
 ## Testes automatizados
 
-As suítes ficam em `calculadoras/tests/`:
+As suítes em `calculadoras/tests/` cobrem:
 
-- `core.test.js`: cálculos, séries temporais, links compartilháveis e Cenário A/B;
-- `sensitivity.test.js`: pontos de equilíbrio, matriz e impacto dos custos;
-- `housing-costs.test.js`: aquisição, venda, IPTU, tributação simplificada, compatibilidade e URL.
+- fórmulas principais e séries;
+- URLs e Cenário A/B;
+- Comprar × Alugar;
+- custos imobiliários;
+- sensibilidade e pontos de equilíbrio;
+- Amortizar × Investir e sua matriz;
+- presets e garantia de não alterar taxas contratuais.
 
-Para rodar localmente, com Node.js 18+:
+Para rodar localmente:
 
 ```bash
 node --test calculadoras/tests/*.test.js
@@ -173,7 +177,7 @@ Para verificar sintaxe:
 for file in calculadoras/*.js; do node --check "$file"; done
 ```
 
-O workflow `.github/workflows/calculadoras-tests.yml` executa essas verificações automaticamente em pushes e pull requests que alterem o MVP.
+O workflow `.github/workflows/calculadoras-tests.yml` executa automaticamente essas verificações.
 
 ## URLs disponíveis
 
@@ -190,10 +194,6 @@ O workflow `.github/workflows/calculadoras-tests.yml` executa essas verificaçõ
 - `/meta-de-patrimonio`
 - `/comprar-ou-alugar`
 
-## Gráficos
-
-`charts.js` gera SVG diretamente no navegador, sem Chart.js ou D3, e também desenha comparações A × B.
-
 ## Rodar localmente
 
 ```bash
@@ -203,31 +203,28 @@ python -m http.server 8000
 
 Acesse `http://localhost:8000`.
 
-Um servidor HTTP simples não interpreta `_redirects`; as URLs amigáveis completas devem ser validadas no preview/deploy do Cloudflare Pages.
+Um servidor HTTP simples não interpreta `_redirects`; as rotas amigáveis completas devem ser validadas no Cloudflare Pages.
 
 ## Deploy no Cloudflare Pages
 
-Use o repositório `rsucupira/Pythonzinho` com:
-
-- Branch de produção: `master` depois do merge do PR;
+- repositório: `rsucupira/Pythonzinho`;
+- branch de produção: `master` após merge;
 - Framework preset: `None`;
 - Build command: vazio;
 - Build output directory: `calculadoras`.
 
 ## SEO
 
-`routing.js` adapta por rota `<title>`, description, canonical, Open Graph, Twitter metadata e conteúdo principal.
-
-Existe `sitemap.template.xml` com home + 12 ferramentas. Quando o domínio final estiver definido, substitua `{{BASE_URL}}`, publique como `sitemap.xml`, referencie no `robots.txt` e envie ao Google Search Console/Bing Webmaster Tools.
+`routing.js` adapta `<title>`, description, canonical, Open Graph, Twitter metadata e conteúdo principal por rota. `sitemap.template.xml` contém home + 12 ferramentas e permanece como template até o domínio final ser definido.
 
 ## Próximos passos sugeridos
 
 1. Publicar o primeiro preview no Cloudflare Pages.
 2. Conectar domínio/subdomínio e ativar `sitemap.xml`.
-3. Expandir sensibilidade para Amortizar × Investir.
-4. Criar presets de premissas macroeconômicas (conservador/base/agressivo).
-5. Integrar APIs apenas para dados realmente atuais, como CDI e inflação.
+3. Criar análise de sensibilidade para À Vista × Parcelado.
+4. Criar um painel-resumo de premissas e decisões para impressão/PDF.
+5. Integrar APIs somente para dados realmente atuais, como CDI e inflação.
 
 ## Aviso
 
-Os resultados são estimativas educacionais. Valores reais podem envolver CET, regras contratuais, tributação específica, custos regionais, liquidez, risco e outras variáveis não modeladas.
+Os resultados são estimativas educacionais. Valores reais podem envolver CET, impostos, tarifas, risco, liquidez, regras contratuais, custos regionais e outras variáveis não modeladas.
