@@ -41,13 +41,12 @@
     return {
       title: 'Evolução do patrimônio',
       subtitle: 'Patrimônio projetado versus capital efetivamente aportado.',
-      xLabel: 'tempo',
       series: [
         { key: 'balance', label: 'Patrimônio', className: 'chart-line-primary' },
         { key: 'contributed', label: 'Capital aportado', className: 'chart-line-secondary' }
       ],
       points: sampleSeries(points),
-      formatX: (x) => x >= 12 ? `${(x / 12).toFixed(x % 12 === 0 ? 0 : 1)}a` : `${x}m`
+      formatX: (x) => x >= 12 ? `${(x / 12).toFixed(x % 12 === 0 ? 0 : 1)}a` : `${Math.round(x)}m`
     };
   }
 
@@ -75,7 +74,6 @@
     return {
       title: 'Evolução do financiamento',
       subtitle: 'Saldo devedor, amortização acumulada e juros acumulados ao longo do prazo.',
-      xLabel: 'parcelas',
       series: [
         { key: 'balance', label: 'Saldo devedor', className: 'chart-line-primary' },
         { key: 'cumulativePrincipal', label: 'Amortização', className: 'chart-line-secondary' },
@@ -108,14 +106,13 @@
       subtitle: balance >= values.target
         ? 'A curva mostra quando o patrimônio projetado cruza a meta informada.'
         : 'A meta não foi atingida dentro do limite de 100 anos do simulador.',
-      xLabel: 'tempo',
       series: [
         { key: 'balance', label: 'Patrimônio', className: 'chart-line-primary' },
         { key: 'contributed', label: 'Capital aportado', className: 'chart-line-secondary' },
         { key: 'target', label: 'Meta', className: 'chart-line-goal', dashed: true }
       ],
       points: sampleSeries(points),
-      formatX: (x) => x >= 12 ? `${(x / 12).toFixed(x % 12 === 0 ? 0 : 1)}a` : `${x}m`
+      formatX: (x) => x >= 12 ? `${(x / 12).toFixed(x % 12 === 0 ? 0 : 1)}a` : `${Math.round(x)}m`
     };
   }
 
@@ -233,7 +230,13 @@
   panel.addEventListener('input', scheduleRender);
   panel.addEventListener('submit', () => window.setTimeout(renderChart, 0));
 
-  const observer = new MutationObserver(() => scheduleRender());
+  const observer = new MutationObserver((mutations) => {
+    const relevant = mutations.some((mutation) => {
+      const target = mutation.target instanceof Element ? mutation.target : mutation.target.parentElement;
+      return !target?.closest('#chart-slot');
+    });
+    if (relevant) scheduleRender();
+  });
   observer.observe(panel, { childList: true, subtree: true });
 
   window.addEventListener('DOMContentLoaded', () => window.setTimeout(renderChart, 0));
