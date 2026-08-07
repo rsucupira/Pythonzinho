@@ -177,6 +177,12 @@ test('URL compartilhável faz round-trip dos valores', () => {
   assert.deepEqual(scenario.decode(path.slice(path.indexOf('?')), fields), { initial: 10000, monthly: 500, annualRate: 10, years: 15 });
 });
 
+test('Cenário A ignora parâmetros reservados do cenário B', () => {
+  const fields = [{ id: 'initial' }, { id: 'monthly' }, { id: 'annualRate' }, { id: 'years' }];
+  const search = '?initial=10000&monthly=500&annualRate=10&years=15&compare=1&b_initial=20000&b_monthly=800&b_annualRate=12&b_years=20';
+  assert.deepEqual(scenario.decode(search, fields), { initial: 10000, monthly: 500, annualRate: 10, years: 15 });
+});
+
 test('URL de comprar vs alugar preserva premissas principais', () => {
   const fields = [
     { id: 'propertyPrice' }, { id: 'downPayment' }, { id: 'rentMonthly' }, { id: 'horizonYears' }
