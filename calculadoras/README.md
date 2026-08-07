@@ -20,6 +20,8 @@ Hub estático de calculadoras e simuladores online criado dentro do repositório
   - Quando atinjo minha meta de patrimônio?
 - Simuladores de decisão com comparação econômica entre alternativas
 - URLs amigáveis para SEO e compartilhamento
+- Cenários compartilháveis pela própria URL, sem banco de dados
+- Botão `Copiar link` em cada ferramenta
 - Metadados específicos por ferramenta (title, description, Open Graph e canonical)
 - `robots.txt`, página 404 real, regras `_redirects` e `_headers` para Cloudflare Pages
 - Zero dependência de backend: HTML + CSS + JavaScript
@@ -41,6 +43,25 @@ Após o deploy no Cloudflare Pages:
 - `/meta-de-patrimonio`
 
 Os antigos links por hash continuam sendo aceitos pelo JavaScript quando usados na home, mas a navegação passa a gravar a URL amigável no navegador.
+
+## Compartilhamento de cenários
+
+`share.js` serializa os campos numéricos da ferramenta ativa na query string. Isso permite reconstruir a mesma simulação em outro navegador sem salvar dados no servidor.
+
+Exemplo:
+
+```text
+/juros-compostos?initial=10000&monthly=500&annualRate=10&years=15
+```
+
+O comportamento é:
+
+1. ao abrir uma URL com parâmetros válidos, os campos são preenchidos automaticamente e o resultado é recalculado;
+2. ao alterar os campos, a URL do navegador é atualizada com pequeno debounce;
+3. o botão `Copiar link` copia a simulação atual completa;
+4. `Limpar` restaura os valores padrão e remove os parâmetros da URL.
+
+Os parâmetros não alteram o canonical da página. Para SEO, o canonical continua apontando somente para a rota principal da calculadora.
 
 ## Simuladores de decisão
 
@@ -100,7 +121,7 @@ O arquivo `_headers` também envia canonical por HTTP para as rotas conhecidas.
 Existe `sitemap.template.xml` com todas as 12 URLs (home + 11 ferramentas). Quando o domínio final estiver definido:
 
 1. substitua `{{BASE_URL}}` pelo domínio, sem barra final;
-2. renomeie/copiei o arquivo para `sitemap.xml`;
+2. renomeie/copie o arquivo para `sitemap.xml`;
 3. acrescente ao `robots.txt` a linha `Sitemap: https://SEU-DOMINIO/sitemap.xml`;
 4. envie o sitemap ao Google Search Console e Bing Webmaster Tools.
 
@@ -111,10 +132,9 @@ O sitemap não é ativado antes do domínio final para evitar publicar URLs can�
 1. Publicar o preview no Cloudflare Pages.
 2. Conectar o domínio/subdomínio definitivo e ativar `sitemap.xml`.
 3. Adicionar gráficos nas simulações de longo prazo.
-4. Salvar e compartilhar os valores do cenário pela própria URL.
-5. Adicionar testes automatizados das fórmulas.
-6. Criar o simulador "comprar ou alugar".
-7. Integrar APIs apenas para dados que realmente precisam ser atuais (CDI, inflação, cotações etc.).
+4. Adicionar testes automatizados das fórmulas e dos parâmetros compartilháveis.
+5. Criar o simulador `comprar ou alugar`.
+6. Integrar APIs apenas para dados que realmente precisam ser atuais (CDI, inflação, cotações etc.).
 
 ## Aviso
 
