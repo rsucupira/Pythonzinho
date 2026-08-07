@@ -63,6 +63,42 @@ test('matriz de sensibilidade tem 5x5 e centro reproduz o cenário atual', () =>
   approx(center.difference, current.difference, 1e-6);
 });
 
+test('custos de aquisição e venda deslocam os pontos de equilíbrio contra a compra', () => {
+  const costly = {
+    ...BASE,
+    purchaseCostRate: 5,
+    saleCostRate: 5
+  };
+  const data = sensitivity.buyVsRentSensitivity(costly);
+  assert.equal(data.propertyBreakEven.found, true);
+  assert.equal(data.noDetailed.propertyBreakEven.found, true);
+  assert.equal(data.rentBreakEven.found, true);
+  assert.equal(data.noDetailed.rentBreakEven.found, true);
+  assert.ok(data.propertyBreakEven.value > data.noDetailed.propertyBreakEven.value);
+  assert.ok(data.rentBreakEven.value > data.noDetailed.rentBreakEven.value);
+});
+
+test('remoção dos custos detalhados preserva o custo consolidado e zera extras', () => {
+  const values = sensitivity.withoutDetailedCosts({
+    ...BASE,
+    purchaseCostRate: 4.5,
+    saleCostRate: 5,
+    propertyTaxRate: 0.6,
+    maintenanceRate: 0.8,
+    ownerInsuranceMonthly: 100,
+    hoaExtraMonthly: 150,
+    investmentTaxRate: 15
+  });
+  assert.equal(values.ownerCostRate, 1.5);
+  assert.equal(values.purchaseCostRate, 0);
+  assert.equal(values.saleCostRate, 0);
+  assert.equal(values.propertyTaxRate, 0);
+  assert.equal(values.maintenanceRate, 0);
+  assert.equal(values.ownerInsuranceMonthly, 0);
+  assert.equal(values.hoaExtraMonthly, 0);
+  assert.equal(values.investmentTaxRate, 0);
+});
+
 test('solver informa ausência de cruzamento quando a faixa inteira favorece alugar', () => {
   const point = sensitivity.findBreakEven(BASE, 'propertyAppreciation', {
     min: -20,
