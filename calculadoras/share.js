@@ -22,8 +22,18 @@
     return values;
   }
 
+  function preserveComparisonParams(url) {
+    const current = new URL(window.location.href);
+    if (current.searchParams.get('compare') === '1') url.searchParams.set('compare', '1');
+    for (const [key, value] of current.searchParams.entries()) {
+      if (key.startsWith('b_')) url.searchParams.set(key, value);
+    }
+    return url;
+  }
+
   function buildScenarioUrl(calc, form) {
-    return new URL(ScenarioCodec.encode(calc.id, calc.fields, formValues(calc, form)), window.location.origin);
+    const url = new URL(ScenarioCodec.encode(calc.id, calc.fields, formValues(calc, form)), window.location.origin);
+    return preserveComparisonParams(url);
   }
 
   function syncBrowserUrl(calc, form) {
@@ -129,7 +139,16 @@
           window.setTimeout(() => {
             const currentCalc = getActiveCalculator();
             if (!currentCalc) return;
-            history.replaceState(null, '', ScenarioCodec.pathFor(currentCalc.id));
+            const current = new URL(window.location.href);
+            const keepComparison = current.searchParams.get('compare') === '1';
+            const next = new URL(ScenarioCodec.pathFor(currentCalc.id), window.location.origin);
+            if (keepComparison) {
+              next.searchParams.set('compare', '1');
+              for (const [key, value] of current.searchParams.entries()) {
+                if (key.startsWith('b_')) next.searchParams.set(key, value);
+              }
+            }
+            history.replaceState(null, '', `${next.pathname}${next.search}`);
           }, 0);
         });
       }
