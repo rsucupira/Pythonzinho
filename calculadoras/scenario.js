@@ -14,7 +14,8 @@
     combustivel: '/custo-de-combustivel',
     'avista-ou-parcelado': '/avista-ou-parcelado',
     'amortizar-ou-investir': '/amortizar-ou-investir',
-    'meta-de-patrimonio': '/meta-de-patrimonio'
+    'meta-de-patrimonio': '/meta-de-patrimonio',
+    'comprar-ou-alugar': '/comprar-ou-alugar'
   };
 
   function cleanNumber(value) {
