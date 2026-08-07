@@ -13,4 +13,5 @@
   <url><loc>{{BASE_URL}}/avista-ou-parcelado</loc></url>
   <url><loc>{{BASE_URL}}/amortizar-ou-investir</loc></url>
   <url><loc>{{BASE_URL}}/meta-de-patrimonio</loc></url>
+  <url><loc>{{BASE_URL}}/comprar-ou-alugar</loc></url>
 </urlset>
