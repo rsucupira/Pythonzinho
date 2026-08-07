@@ -178,6 +178,114 @@
     return { ...summary, points };
   }
 
+  function buyVsRentSeries({
+    propertyPrice,
+    downPayment,
+    mortgageRate,
+    mortgageYears,
+    rentMonthly,
+    rentGrowthRate,
+    propertyAppreciation,
+    investmentReturn,
+    ownerCostRate,
+    horizonYears
+  }) {
+    if (propertyPrice <= 0) throw new RangeError('propertyPrice must be positive');
+    if (downPayment < 0 || downPayment > propertyPrice) throw new RangeError('downPayment must be between zero and propertyPrice');
+    if (rentMonthly < 0) throw new RangeError('rentMonthly must be non-negative');
+
+    const horizonMonths = Math.max(1, Math.round(horizonYears * 12));
+    const mortgageMonths = Math.max(1, Math.round(mortgageYears * 12));
+    const principal = propertyPrice - downPayment;
+    const mortgage = priceFinancing({ principal, annualRate: mortgageRate, months: mortgageMonths });
+    const propertyMonthlyRate = annualToMonthlyRate(propertyAppreciation);
+    const rentMonthlyRate = annualToMonthlyRate(rentGrowthRate);
+    const investmentMonthlyRate = annualToMonthlyRate(investmentReturn);
+    const ownerMonthlyRate = ownerCostRate / 100 / 12;
+
+    let propertyValue = propertyPrice;
+    let debtBalance = principal;
+    let currentRent = rentMonthly;
+    let buyerPortfolio = 0;
+    let renterPortfolio = downPayment;
+    let totalBuyerHousingCost = 0;
+    let totalRentPaid = 0;
+
+    const points = [{
+      month: 0,
+      buyerNetWorth: propertyValue - debtBalance,
+      renterNetWorth: renterPortfolio,
+      homeEquity: propertyValue - debtBalance,
+      propertyValue,
+      debtBalance,
+      rent: currentRent
+    }];
+
+    for (let month = 1; month <= horizonMonths; month += 1) {
+      let mortgagePayment = 0;
+      if (debtBalance > EPS) {
+        const interest = mortgage.monthlyRate * debtBalance;
+        mortgagePayment = month >= mortgage.months
+          ? debtBalance + interest
+          : Math.min(mortgage.payment, debtBalance + interest);
+        const principalPaid = Math.max(0, mortgagePayment - interest);
+        debtBalance = Math.max(0, debtBalance - principalPaid);
+      }
+
+      const ownerCost = propertyValue * ownerMonthlyRate;
+      const buyerHousingCost = mortgagePayment + ownerCost;
+      const renterHousingCost = currentRent;
+      const commonBudget = Math.max(buyerHousingCost, renterHousingCost);
+
+      buyerPortfolio = buyerPortfolio * (1 + investmentMonthlyRate) + (commonBudget - buyerHousingCost);
+      renterPortfolio = renterPortfolio * (1 + investmentMonthlyRate) + (commonBudget - renterHousingCost);
+      totalBuyerHousingCost += buyerHousingCost;
+      totalRentPaid += renterHousingCost;
+
+      propertyValue *= (1 + propertyMonthlyRate);
+      currentRent *= (1 + rentMonthlyRate);
+
+      const homeEquity = propertyValue - debtBalance;
+      points.push({
+        month,
+        buyerNetWorth: homeEquity + buyerPortfolio,
+        renterNetWorth: renterPortfolio,
+        homeEquity,
+        propertyValue,
+        debtBalance,
+        rent: currentRent
+      });
+    }
+
+    const last = points[points.length - 1];
+    const difference = last.buyerNetWorth - last.renterNetWorth;
+    const recommendation = difference > 1 ? 'buy' : difference < -1 ? 'rent' : 'equivalent';
+
+    return {
+      months: horizonMonths,
+      mortgagePayment: principal > EPS ? mortgage.payment : 0,
+      propertyValue: last.propertyValue,
+      remainingDebt: last.debtBalance,
+      homeEquity: last.homeEquity,
+      buyerPortfolio,
+      renterPortfolio: last.renterNetWorth,
+      buyerNetWorth: last.buyerNetWorth,
+      renterNetWorth: last.renterNetWorth,
+      difference,
+      recommendation,
+      finalRent: last.rent,
+      totalBuyerHousingCost,
+      totalRentPaid,
+      points
+    };
+  }
+
+  function buyVsRentProjection(values) {
+    const result = buyVsRentSeries(values);
+    const { points, ...summary } = result;
+    return summary;
+  }
+
   return {
     annualToMonthlyRate,
     compoundProjection,
@@ -193,6 +301,8 @@
     cashVsInstallments,
     amortizeVsInvest,
     targetProjection,
-    targetSeries
+    targetSeries,
+    buyVsRentProjection,
+    buyVsRentSeries
   };
 });
