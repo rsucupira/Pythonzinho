@@ -1,0 +1,37 @@
+.amort-sensitivity {
+  margin-top: 22px;
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: rgba(255,255,255,.025);
+}
+.amort-sensitivity-head { display:flex; justify-content:space-between; gap:22px; align-items:flex-start; }
+.amort-sensitivity-head h3 { margin:7px 0 6px; font-size:21px; letter-spacing:-.03em; }
+.amort-sensitivity-head p, .amort-matrix-head p, .amort-note { margin:0; color:var(--muted); font-size:12px; line-height:1.55; }
+.amort-current-result { min-width:210px; padding:13px 15px; border:1px solid var(--line); border-radius:14px; background:rgba(255,255,255,.03); }
+.amort-current-result span, .amort-current-result small { display:block; color:var(--muted); font-size:10px; }
+.amort-current-result strong { display:block; margin:4px 0 3px; font-size:15px; }
+.amort-thresholds { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; margin-top:16px; }
+.amort-thresholds article { padding:16px; border:1px solid var(--line); border-radius:15px; background:rgba(255,255,255,.02); }
+.amort-thresholds span { display:block; color:var(--muted); font-size:10px; text-transform:uppercase; letter-spacing:.08em; }
+.amort-thresholds strong { display:block; margin:6px 0 5px; font-size:22px; letter-spacing:-.03em; }
+.amort-thresholds p { margin:0; color:var(--muted); font-size:11px; line-height:1.5; }
+.amort-matrix-head { margin-top:20px; }
+.amort-matrix-head h4 { margin:0 0 5px; font-size:17px; }
+.amort-table-wrap { margin-top:12px; overflow-x:auto; }
+.amort-table { width:100%; min-width:560px; border-collapse:separate; border-spacing:5px; font-size:11px; }
+.amort-table caption { padding-bottom:8px; color:var(--muted); text-align:left; font-size:10px; }
+.amort-table th { padding:8px; color:var(--muted); font-weight:700; }
+.amort-table td { padding:11px 8px; border:1px solid var(--line); border-radius:9px; text-align:center; font-weight:800; }
+.amort-win { background:rgba(124,242,200,.08); }
+.invest-win { background:rgba(127,180,255,.09); }
+.amort-equal { background:rgba(255,255,255,.045); }
+.amort-current { outline:2px solid var(--accent); outline-offset:1px; }
+.amort-current-axis { color:var(--text) !important; }
+.amort-note { margin-top:12px; }
+@media (max-width:720px) {
+  .amort-sensitivity { padding:16px; }
+  .amort-sensitivity-head { flex-direction:column; }
+  .amort-current-result { width:100%; min-width:0; }
+  .amort-thresholds { grid-template-columns:1fr; }
+}
