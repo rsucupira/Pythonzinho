@@ -1,46 +1,41 @@
 # Cloudflare Pages — publicar o MVP atual
 
-Este projeto é estático e não precisa de framework ou etapa de build.
+Este projeto é estático e não precisa de framework nem etapa de build.
 
-## Configuração recomendada agora
+## Estado atual
 
-Objetivo: colocar o estado atual de `mvp-calculadoras` online sem alterar a `master`.
+A branch de produção do projeto Pages foi ajustada para `mvp-calculadoras` em 07/08/2026 para publicar o MVP sem alterar a `master`.
 
-No Cloudflare Dashboard:
+Configuração usada:
 
-1. Abra **Workers & Pages**.
-2. Crie um projeto em **Pages** e conecte o GitHub.
-3. Selecione o repositório `rsucupira/Pythonzinho`.
-4. Use, temporariamente, `mvp-calculadoras` como **Production branch**.
-5. Nome sugerido do projeto: `pythonzinho-calcula` (se disponível).
-6. Framework preset: **None**.
-7. Build command: `exit 0`.
-8. Build output directory: `calculadoras`.
-9. Root directory: deixe o repositório como raiz (`/`).
-10. Inicie o deploy.
+- Repositório: `rsucupira/Pythonzinho`
+- Production branch: `mvp-calculadoras`
+- Framework preset: `None`
+- Build command: vazio
+- Build output directory: `calculadoras`
+- Root directory: vazio / raiz do repositório
+- Automatic deployments: habilitado
 
-Após o primeiro deploy, o Cloudflare fornecerá um endereço no formato:
+Este commit existe também para disparar um novo deployment após a correção da branch de produção.
+
+## Endereço
+
+Após o deploy bem-sucedido, o Cloudflare fornecerá um endereço no formato:
 
 ```text
 https://<nome-do-projeto>.pages.dev
 ```
 
-Se o nome `pythonzinho-calcula` estiver disponível, o endereço esperado será:
-
-```text
-https://pythonzinho-calcula.pages.dev
-```
+O nome exato depende do nome escolhido para o projeto Pages.
 
 ## Depois do merge
 
 Quando `mvp-calculadoras` for incorporada à `master`:
 
 1. Abra o projeto Pages.
-2. Vá a **Settings > Builds** / **Branch control**.
+2. Vá a **Settings > Builds > Branch control**.
 3. Troque a Production branch de `mvp-calculadoras` para `master`.
 4. Mantenha as demais branches como preview deployments.
-
-O Cloudflare Pages gera URLs de preview por branch/PR sem afetar a produção.
 
 ## Domínio próprio depois
 
@@ -48,4 +43,4 @@ Somente depois de validar o MVP no `*.pages.dev`, conectar um domínio como `cal
 
 ## Observação
 
-O site usa caminhos absolutos (`/styles.css`, `/app.js`, etc.), portanto `calculadoras` precisa ser tratada como a raiz publicada do site. A configuração `Build output directory = calculadoras` faz exatamente isso.
+O site usa caminhos absolutos (`/styles.css`, `/app.js`, etc.), portanto `calculadoras` precisa ser tratada como a raiz publicada do site. `Build output directory = calculadoras` faz exatamente isso.
