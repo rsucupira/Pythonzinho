@@ -57,7 +57,8 @@
     const selectors = [
       '#sensitivity-panel .sensitivity-card',
       '#amortization-sensitivity-panel .amortization-sensitivity-card',
-      '#cash-sensitivity-panel .cash-sensitivity-card'
+      '#cash-sensitivity-panel .cash-sensitivity-card',
+      '#financing-sensitivity-panel .financing-sensitivity-card'
     ];
     return selectors.flatMap((selector) => [...panel.querySelectorAll(selector)]).map((card) => ({
       label: card.querySelector('span')?.textContent?.trim() || '',
