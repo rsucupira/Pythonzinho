@@ -1,9 +1,8 @@
 (() => {
   const CHART_IDS = new Set(['juros-compostos', 'financiamento', 'meta-de-patrimonio']);
   const panel = document.querySelector('#calculator-panel');
-  if (!panel) return;
+  if (!panel || typeof CalculadoraMath === 'undefined') return;
 
-  const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
   const safeNumber = (value, fallback = 0) => {
     const n = Number(value);
     return Number.isFinite(n) ? n : fallback;
@@ -26,18 +25,8 @@
   }
 
   function compoundData(values) {
-    const months = Math.max(1, Math.round(values.years * 12));
-    const monthlyRate = Math.pow(1 + values.annualRate / 100, 1 / 12) - 1;
-    let balance = values.initial;
-    let contributed = values.initial;
-    const points = [{ x: 0, balance, contributed }];
-
-    for (let month = 1; month <= months; month += 1) {
-      balance = balance * (1 + monthlyRate) + values.monthly;
-      contributed += values.monthly;
-      points.push({ x: month, balance, contributed });
-    }
-
+    const projection = CalculadoraMath.compoundSeries(values);
+    const points = projection.points.map((p) => ({ x: p.month, balance: p.balance, contributed: p.contributed }));
     return {
       title: 'Evolução do patrimônio',
       subtitle: 'Patrimônio projetado versus capital efetivamente aportado.',
@@ -51,26 +40,13 @@
   }
 
   function financingData(values) {
-    const n = Math.max(1, Math.round(values.months));
-    const monthlyRate = Math.pow(1 + values.annualRate / 100, 1 / 12) - 1;
-    const payment = Math.abs(monthlyRate) < 1e-12
-      ? values.principal / n
-      : values.principal * monthlyRate / (1 - Math.pow(1 + monthlyRate, -n));
-
-    let balance = values.principal;
-    let cumulativeInterest = 0;
-    let cumulativePrincipal = 0;
-    const points = [{ x: 0, balance, cumulativeInterest, cumulativePrincipal }];
-
-    for (let month = 1; month <= n; month += 1) {
-      const interest = Math.abs(monthlyRate) < 1e-12 ? 0 : balance * monthlyRate;
-      const principalPaid = month === n ? balance : clamp(payment - interest, 0, balance);
-      balance = Math.max(0, balance - principalPaid);
-      cumulativeInterest += interest;
-      cumulativePrincipal += principalPaid;
-      points.push({ x: month, balance, cumulativeInterest, cumulativePrincipal });
-    }
-
+    const schedule = CalculadoraMath.priceSchedule(values);
+    const points = schedule.points.map((p) => ({
+      x: p.month,
+      balance: p.balance,
+      cumulativeInterest: p.cumulativeInterest,
+      cumulativePrincipal: p.cumulativePrincipal
+    }));
     return {
       title: 'Evolução do financiamento',
       subtitle: 'Saldo devedor, amortização acumulada e juros acumulados ao longo do prazo.',
@@ -85,25 +61,11 @@
   }
 
   function targetData(values) {
-    const monthlyRate = Math.pow(1 + values.annualRate / 100, 1 / 12) - 1;
-    const maxMonths = 1200;
-    let balance = values.current;
-    let contributed = values.current;
-    const points = [{ x: 0, balance, contributed, target: values.target }];
-    let month = 0;
-
-    while (balance < values.target && month < maxMonths) {
-      balance = balance * (1 + monthlyRate) + values.monthly;
-      contributed += values.monthly;
-      month += 1;
-      points.push({ x: month, balance, contributed, target: values.target });
-    }
-
-    if (points.length === 1) points.push({ x: 1, balance, contributed, target: values.target });
-
+    const projection = CalculadoraMath.targetSeries(values);
+    const points = projection.points.map((p) => ({ x: p.month, balance: p.balance, contributed: p.contributed, target: p.target }));
     return {
       title: 'Caminho até a meta',
-      subtitle: balance >= values.target
+      subtitle: projection.reached
         ? 'A curva mostra quando o patrimônio projetado cruza a meta informada.'
         : 'A meta não foi atingida dentro do limite de 100 anos do simulador.',
       series: [
