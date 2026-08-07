@@ -1,5 +1,5 @@
 (() => {
-  const CHART_IDS = new Set(['juros-compostos', 'financiamento', 'meta-de-patrimonio']);
+  const CHART_IDS = new Set(['juros-compostos', 'financiamento', 'meta-de-patrimonio', 'comprar-ou-alugar']);
   const panel = document.querySelector('#calculator-panel');
   if (!panel || typeof CalculadoraMath === 'undefined') return;
 
@@ -78,10 +78,30 @@
     };
   }
 
+  function housingData(values) {
+    const projection = CalculadoraMath.buyVsRentSeries(values);
+    const points = projection.points.map((p) => ({
+      x: p.month,
+      buyerNetWorth: p.buyerNetWorth,
+      renterNetWorth: p.renterNetWorth
+    }));
+    return {
+      title: 'Patrimônio: comprar × alugar',
+      subtitle: 'As curvas usam o mesmo orçamento habitacional mensal e investem a diferença de custo entre as alternativas.',
+      series: [
+        { key: 'buyerNetWorth', label: 'Comprar', className: 'chart-line-primary' },
+        { key: 'renterNetWorth', label: 'Alugar + investir', className: 'chart-line-secondary' }
+      ],
+      points: sampleSeries(points),
+      formatX: (x) => x >= 12 ? `${(x / 12).toFixed(x % 12 === 0 ? 0 : 1)}a` : `${Math.round(x)}m`
+    };
+  }
+
   function chartData(calc, values) {
     if (calc.id === 'juros-compostos') return compoundData(values);
     if (calc.id === 'financiamento') return financingData(values);
     if (calc.id === 'meta-de-patrimonio') return targetData(values);
+    if (calc.id === 'comprar-ou-alugar') return housingData(values);
     return null;
   }
 
@@ -156,6 +176,9 @@
     if (!calc || !form || !result || !CHART_IDS.has(calc.id)) return;
 
     const values = formValues(calc, form);
+    const customError = calc.validate ? calc.validate(values) : null;
+    if (customError) return;
+
     const data = chartData(calc, values);
     if (!data) return;
 
