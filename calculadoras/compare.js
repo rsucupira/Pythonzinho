@@ -90,6 +90,11 @@
     window.dispatchEvent(new CustomEvent('comparisonchange', { detail: window.CalculatorComparison }));
   }
 
+  function invalidatePublishedComparison(calc) {
+    window.CalculatorComparison = { enabled: true, activeId: calc.id, values: null };
+    window.dispatchEvent(new CustomEvent('comparisonchange', { detail: window.CalculatorComparison }));
+  }
+
   function calculateB(calc, form) {
     const resultSlot = form.querySelector('[data-compare-result]');
     const errorSlot = form.querySelector('[data-compare-error]');
@@ -97,6 +102,7 @@
     if (read.error) {
       resultSlot.innerHTML = '';
       errorSlot.innerHTML = `<div class="error-message">${read.error}</div>`;
+      invalidatePublishedComparison(calc);
       return;
     }
     errorSlot.innerHTML = '';
