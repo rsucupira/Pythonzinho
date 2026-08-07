@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="description" content="Pythonzinho Calcula: hub gratuito de calculadoras para dinheiro, finanças, compras, negócios e dia a dia." />
+  <meta name="description" content="Pythonzinho Calcula: hub gratuito de calculadoras e simuladores para dinheiro, finanças, compras, negócios e dia a dia." />
   <meta name="theme-color" content="#0b1220" />
   <title>Pythonzinho Calcula — contas úteis em segundos</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -22,20 +22,20 @@
 
   <main>
     <section class="hero" aria-labelledby="hero-title">
-      <div class="eyebrow">MVP · 8 calculadoras gratuitas</div>
+      <div class="eyebrow">MVP · 11 ferramentas gratuitas</div>
       <h1 id="hero-title">Uma pergunta.<br /><span>Uma conta.</span></h1>
       <p>Faça cálculos úteis do dia a dia, compare cenários e entenda o resultado sem planilha.</p>
 
       <label class="search" for="calculator-search">
         <span aria-hidden="true">⌕</span>
-        <input id="calculator-search" type="search" placeholder="O que você quer calcular? Ex.: juros, desconto, combustível..." autocomplete="off" />
+        <input id="calculator-search" type="search" placeholder="O que você quer calcular? Ex.: juros, parcelado, meta, combustível..." autocomplete="off" />
       </label>
 
       <div class="quick-links" aria-label="Atalhos">
         <span>Populares:</span>
+        <button data-open="avista-ou-parcelado">À vista ou parcelado?</button>
         <button data-open="juros-compostos">Juros compostos</button>
         <button data-open="financiamento">Financiamento</button>
-        <button data-open="porcentagem">Porcentagem</button>
       </div>
     </section>
 
@@ -46,7 +46,7 @@
             <span class="section-kicker">Ferramentas</span>
             <h2>Escolha uma conta</h2>
           </div>
-          <span id="calculator-count" class="count">8</span>
+          <span id="calculator-count" class="count">11</span>
         </div>
         <div id="calculator-list" class="calculator-list"></div>
         <div id="empty-state" class="empty-state" hidden>
@@ -59,24 +59,27 @@
 
     <section class="decision-section">
       <div>
-        <span class="section-kicker">Próxima fase</span>
-        <h2>De calculadora para ferramenta de decisão.</h2>
+        <span class="section-kicker">Simuladores de decisão</span>
+        <h2>Não apenas calcule. Compare alternativas.</h2>
       </div>
       <div class="decision-grid">
         <article>
           <span>01</span>
           <h3>À vista ou parcelado?</h3>
-          <p>Compare desconto, juros implícitos e custo de oportunidade.</p>
+          <p>Compare preço, valor presente das parcelas e custo de oportunidade.</p>
+          <button data-open="avista-ou-parcelado" type="button">Simular agora →</button>
         </article>
         <article>
           <span>02</span>
           <h3>Amortizar ou investir?</h3>
-          <p>Coloque duas alternativas lado a lado e veja o impacto financeiro.</p>
+          <p>Compare o custo efetivo da dívida com o retorno esperado do investimento.</p>
+          <button data-open="amortizar-ou-investir" type="button">Simular agora →</button>
         </article>
         <article>
           <span>03</span>
-          <h3>Comprar ou alugar?</h3>
-          <p>Projete patrimônio, aluguel, financiamento e valorização.</p>
+          <h3>Quando atinjo minha meta?</h3>
+          <p>Projete o tempo necessário para chegar ao patrimônio desejado.</p>
+          <button data-open="meta-de-patrimonio" type="button">Simular agora →</button>
         </article>
       </div>
     </section>
@@ -87,5 +90,6 @@
   </footer>
 
   <script src="app.js"></script>
+  <script src="decisions.js"></script>
 </body>
 </html>
