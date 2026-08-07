@@ -30,6 +30,7 @@
     ],
     validate(values) {
       if (values.downPayment > values.propertyPrice) return 'A entrada não pode ser maior que o preço do imóvel.';
+      if (values.investmentTaxRate > 100) return 'O imposto simplificado sobre ganhos não pode ultrapassar 100%.';
       return null;
     },
     calculate(values) {
