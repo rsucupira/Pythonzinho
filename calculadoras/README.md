@@ -10,6 +10,7 @@ Hub estático de calculadoras e simuladores online criado dentro do repositório
 - simuladores de decisão;
 - URLs amigáveis para SEO;
 - cenários compartilháveis pela query string;
+- comparação Cenário A × Cenário B nas simulações de longo prazo;
 - botão `Copiar link`;
 - gráficos SVG responsivos;
 - metadados específicos por ferramenta;
@@ -31,6 +32,38 @@ Hub estático de calculadoras e simuladores online criado dentro do repositório
 10. Amortizar ou investir?
 11. Quando atinjo minha meta de patrimônio?
 12. Comprar imóvel ou alugar e investir?
+
+## Comparação Cenário A × Cenário B
+
+`compare.js` adiciona um segundo conjunto de premissas nas quatro ferramentas com evolução temporal:
+
+- Juros compostos;
+- Financiamento Price;
+- Meta de patrimônio;
+- Comprar ou alugar.
+
+O Cenário B é inicializado com os valores do A e pode ser alterado campo a campo. O resultado numérico do B usa a mesma função de cálculo da ferramenta principal.
+
+Os gráficos passam automaticamente para o modo comparativo:
+
+- juros compostos: patrimônio A × patrimônio B;
+- financiamento: saldo devedor A × saldo devedor B;
+- meta: patrimônio e meta de A × B;
+- comprar ou alugar: comprar/alugar no cenário A × comprar/alugar no B.
+
+Os horizontes podem ser diferentes. O gráfico calcula a escala usando todas as séries, sem obrigar A e B a terem o mesmo número de meses.
+
+### Compartilhamento da comparação
+
+O link completo preserva os dois cenários. O A usa os parâmetros normais e o B usa prefixo `b_`, além de `compare=1`.
+
+Exemplo:
+
+```text
+/juros-compostos?initial=10000&monthly=500&annualRate=10&years=15&compare=1&b_initial=20000&b_monthly=800&b_annualRate=12&b_years=20
+```
+
+Abrir esse endereço reconstrói a comparação. Alterações no Cenário A preservam os parâmetros do B, e `Copiar link` copia o estado completo.
 
 ## Comprar ou alugar
 
@@ -64,25 +97,7 @@ Os gráficos usam séries geradas pelo mesmo núcleo:
 
 ## Testes automatizados
 
-A suíte está em:
-
-```text
-calculadoras/tests/core.test.js
-```
-
-Ela cobre, entre outros pontos:
-
-- conversão de taxa anual para mensal;
-- juros compostos;
-- financiamento Price e saldo final zero;
-- porcentagem, desconto e regra de três;
-- ROI, margem/markup e combustível;
-- à vista vs. parcelado;
-- amortizar vs. investir;
-- meta de patrimônio;
-- comprar vs. alugar;
-- séries temporais usadas pelos gráficos;
-- serialização e restauração de cenários pela URL.
+A suíte está em `calculadoras/tests/core.test.js` e cobre cálculos, séries temporais, links compartilháveis, isolamento entre parâmetros de Cenário A/B e o simulador imobiliário.
 
 Para rodar localmente, com Node.js 18+:
 
@@ -90,17 +105,15 @@ Para rodar localmente, com Node.js 18+:
 node --test calculadoras/tests/*.test.js
 ```
 
-Para verificar apenas sintaxe:
+Para verificar sintaxe:
 
 ```bash
 for file in calculadoras/*.js; do node --check "$file"; done
 ```
 
-O workflow `.github/workflows/calculadoras-tests.yml` executa automaticamente essas verificações em pushes e pull requests que alterem o MVP.
+O workflow `.github/workflows/calculadoras-tests.yml` executa essas verificações automaticamente em pushes e pull requests que alterem o MVP.
 
 ## URLs disponíveis
-
-Após o deploy no Cloudflare Pages:
 
 - `/juros-compostos`
 - `/financiamento`
@@ -117,26 +130,11 @@ Após o deploy no Cloudflare Pages:
 
 ## Cenários compartilháveis
 
-`scenario.js` concentra a codificação e leitura dos parâmetros. `share.js` cuida da integração com o formulário e a área de transferência.
-
-Exemplo:
-
-```text
-/juros-compostos?initial=10000&monthly=500&annualRate=10&years=15
-```
-
-Ao abrir um endereço compartilhado, a ferramenta é preenchida e recalculada. Alterar os campos atualiza a URL; `Copiar link` copia o cenário atual; `Limpar` restaura o padrão.
-
-O canonical continua apontando para a rota limpa, sem parâmetros.
+`scenario.js` concentra a codificação e leitura dos parâmetros. `share.js` integra o formulário com a URL e área de transferência. O canonical continua apontando para a rota limpa, sem parâmetros.
 
 ## Gráficos
 
-`charts.js` gera SVG diretamente no navegador, sem Chart.js ou D3.
-
-- Juros compostos: patrimônio projetado × capital aportado.
-- Financiamento Price: saldo devedor × amortização × juros.
-- Meta de patrimônio: patrimônio × capital aportado × meta.
-- Comprar vs. alugar: patrimônio líquido da compra × carteira de aluguel + investimento.
+`charts.js` gera SVG diretamente no navegador, sem Chart.js ou D3, e também desenha as comparações A × B.
 
 ## Rodar localmente
 
@@ -168,7 +166,7 @@ Existe `sitemap.template.xml` com home + 12 ferramentas. Quando o domínio final
 
 1. Publicar o primeiro preview no Cloudflare Pages.
 2. Conectar domínio/subdomínio e ativar `sitemap.xml`.
-3. Criar comparação lado a lado entre cenários.
+3. Criar análise de sensibilidade / ponto de equilíbrio para simuladores de decisão.
 4. Adicionar custos opcionais mais detalhados ao simulador imobiliário.
 5. Integrar APIs apenas para dados realmente atuais, como CDI e inflação.
 
