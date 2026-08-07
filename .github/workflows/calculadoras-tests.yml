@@ -1,0 +1,33 @@
+name: Calculadoras MVP tests
+
+on:
+  push:
+    branches: [master, mvp-calculadoras]
+    paths:
+      - 'calculadoras/**'
+      - '.github/workflows/calculadoras-tests.yml'
+  pull_request:
+    paths:
+      - 'calculadoras/**'
+      - '.github/workflows/calculadoras-tests.yml'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Check JavaScript syntax
+        run: |
+          for file in calculadoras/*.js; do
+            node --check "$file"
+          done
+
+      - name: Run unit tests
+        run: node --test calculadoras/tests/*.test.js

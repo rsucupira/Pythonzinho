@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <!-- Substitua {{BASE_URL}} pelo domínio final e renomeie para sitemap.xml antes de enviar aos buscadores. -->
+  <url><loc>{{BASE_URL}}/</loc></url>
+  <url><loc>{{BASE_URL}}/juros-compostos</loc></url>
+  <url><loc>{{BASE_URL}}/financiamento</loc></url>
+  <url><loc>{{BASE_URL}}/porcentagem</loc></url>
+  <url><loc>{{BASE_URL}}/desconto</loc></url>
+  <url><loc>{{BASE_URL}}/regra-de-tres</loc></url>
+  <url><loc>{{BASE_URL}}/roi</loc></url>
+  <url><loc>{{BASE_URL}}/margem-e-markup</loc></url>
+  <url><loc>{{BASE_URL}}/custo-de-combustivel</loc></url>
+  <url><loc>{{BASE_URL}}/avista-ou-parcelado</loc></url>
+  <url><loc>{{BASE_URL}}/amortizar-ou-investir</loc></url>
+  <url><loc>{{BASE_URL}}/meta-de-patrimonio</loc></url>
+  <url><loc>{{BASE_URL}}/comprar-ou-alugar</loc></url>
+</urlset>

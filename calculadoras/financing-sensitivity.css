@@ -1,0 +1,108 @@
+.financing-sensitivity-panel {
+  margin-top: 22px;
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: rgba(255,255,255,.025);
+}
+
+.financing-sensitivity-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 18px;
+}
+
+.financing-sensitivity-head h3,
+.financing-matrix-head h4 {
+  margin: 7px 0 6px;
+  letter-spacing: -.03em;
+}
+
+.financing-sensitivity-head h3 { font-size: 21px; }
+.financing-matrix-head h4 { font-size: 17px; }
+
+.financing-sensitivity-head p,
+.financing-matrix-head p,
+.financing-sensitivity-note {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.financing-target-status {
+  min-width: 190px;
+  padding: 13px 15px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: rgba(255,255,255,.03);
+}
+
+.financing-target-status span,
+.financing-target-status small {
+  display: block;
+  color: var(--muted);
+  font-size: 10px;
+}
+
+.financing-target-status strong {
+  display: block;
+  margin: 4px 0 3px;
+  font-size: 15px;
+}
+
+.financing-sensitivity-cards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.financing-sensitivity-card {
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 15px;
+  background: rgba(255,255,255,.02);
+}
+
+.financing-sensitivity-card span {
+  display: block;
+  color: var(--muted);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+}
+
+.financing-sensitivity-card strong {
+  display: block;
+  margin: 6px 0 5px;
+  font-size: 20px;
+  letter-spacing: -.03em;
+}
+
+.financing-sensitivity-card p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.financing-matrix-head { margin-top: 18px; }
+.financing-table-wrap { overflow-x: auto; margin-top: 10px; }
+.financing-table { width: 100%; border-collapse: collapse; font-size: 11px; }
+.financing-table th,
+.financing-table td { padding: 9px 8px; border: 1px solid var(--line); text-align: center; white-space: nowrap; }
+.financing-table th { color: var(--muted); font-weight: 600; }
+.financing-table td strong { display: block; font-size: 11px; }
+.financing-table td small { display: block; margin-top: 2px; color: var(--muted); font-size: 9px; }
+.financing-meets { background: rgba(45, 212, 191, .09); }
+.financing-misses { background: rgba(248, 113, 113, .07); }
+.financing-current { outline: 2px solid rgba(255,255,255,.28); outline-offset: -2px; }
+.financing-sensitivity-note { margin-top: 12px; }
+
+@media (max-width: 720px) {
+  .financing-sensitivity-head { display: block; }
+  .financing-target-status { margin-top: 12px; min-width: 0; }
+  .financing-sensitivity-cards { grid-template-columns: 1fr; }
+}

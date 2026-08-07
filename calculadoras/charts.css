@@ -1,0 +1,73 @@
+.chart-box {
+  margin-top: 18px;
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: rgba(255,255,255,.025);
+}
+.chart-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+}
+.chart-heading h3 {
+  margin: 7px 0 5px;
+  font-size: 20px;
+  letter-spacing: -.03em;
+}
+.chart-heading p {
+  margin: 0;
+  max-width: 560px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.55;
+}
+.chart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 9px 14px;
+  color: var(--muted);
+  font-size: 11px;
+}
+.chart-legend span { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+.chart-legend i {
+  width: 18px;
+  height: 0;
+  display: inline-block;
+  border-top: 2px solid currentColor;
+}
+.chart-legend i.chart-line-dashed { border-top-style: dashed; }
+.chart-scroll { margin-top: 16px; overflow-x: auto; }
+.scenario-chart { width: 100%; min-width: 580px; height: auto; display: block; }
+.chart-grid { stroke: rgba(255,255,255,.07); stroke-width: 1; }
+.chart-axis { stroke: rgba(255,255,255,.16); stroke-width: 1; }
+.chart-axis-label {
+  fill: var(--muted);
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 10px;
+}
+.chart-line {
+  fill: none;
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+.chart-line-primary { stroke: var(--accent); color: var(--accent); }
+.chart-line-secondary { stroke: #7fb4ff; color: #7fb4ff; }
+.chart-line-tertiary { stroke: #ffbf69; color: #ffbf69; }
+.chart-line-goal { stroke: #d8a6ff; color: #d8a6ff; }
+.chart-line-dashed { stroke-dasharray: 7 6; }
+.chart-endpoint { stroke-width: 0; }
+.chart-endpoint.chart-line-primary { fill: var(--accent); }
+.chart-endpoint.chart-line-secondary { fill: #7fb4ff; }
+.chart-endpoint.chart-line-tertiary { fill: #ffbf69; }
+.chart-endpoint.chart-line-goal { fill: #d8a6ff; }
+
+@media (max-width: 720px) {
+  .chart-box { padding: 16px; }
+  .chart-heading { flex-direction: column; gap: 12px; }
+  .chart-legend { justify-content: flex-start; }
+}

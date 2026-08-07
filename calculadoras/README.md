@@ -1,0 +1,295 @@
+# Pythonzinho Calcula — MVP
+
+Hub estático de calculadoras e simuladores online criado dentro do repositório `Pythonzinho`.
+
+## O que está no MVP
+
+- busca por calculadora/assunto;
+- interface responsiva para desktop e celular;
+- 12 ferramentas funcionais;
+- simuladores de decisão;
+- URLs amigáveis para SEO;
+- cenários compartilháveis pela query string;
+- comparação Cenário A × Cenário B;
+- gráficos SVG responsivos;
+- análise de sensibilidade em Financiamento Price, Comprar × Alugar, Amortizar × Investir e À Vista × Parcelado;
+- custos imobiliários detalhados opcionais;
+- presets ilustrativos Conservador / Base / Otimista;
+- Resumo da Decisão copiável e imprimível;
+- testes automatizados no GitHub Actions;
+- zero backend e zero dependência JavaScript externa.
+
+## Ferramentas
+
+1. Juros compostos
+2. Financiamento Price
+3. Porcentagem
+4. Desconto
+5. Regra de três
+6. ROI
+7. Margem e markup
+8. Custo de combustível
+9. À vista ou parcelado?
+10. Amortizar ou investir?
+11. Quando atinjo minha meta de patrimônio?
+12. Comprar imóvel ou alugar e investir?
+
+## Comparação Cenário A × Cenário B
+
+`compare.js` adiciona um segundo conjunto de premissas em:
+
+- Juros compostos;
+- Financiamento Price;
+- Amortizar ou investir;
+- Meta de patrimônio;
+- Comprar ou alugar.
+
+O Cenário B começa com os valores do A e pode ser alterado campo a campo. Quando há gráfico temporal compatível, as curvas são sobrepostas automaticamente. O B é preservado na URL com prefixo `b_` e `compare=1`.
+
+Exemplo:
+
+```text
+/juros-compostos?initial=10000&monthly=500&annualRate=10&years=15&compare=1&b_initial=20000&b_monthly=800&b_annualRate=12&b_years=20
+```
+
+## Financiamento Price — parcela-alvo e sensibilidade
+
+`financing-enhancement.js` acrescenta **Parcela-alvo** como premissa normal do financiamento. Por ser um campo da própria calculadora, ele funciona com Cenário A/B e URL compartilhável.
+
+`financing-sensitivity-core.js` usa exclusivamente `priceFinancing()` do núcleo matemático e responde:
+
+- **taxa máxima** que mantém a parcela abaixo ou igual ao alvo;
+- **valor financiado máximo** compatível com o alvo;
+- **redução do principal / entrada adicional equivalente** necessária;
+- **prazo mínimo** necessário para atingir a parcela-alvo;
+- impacto de **+1 ponto percentual** na taxa sobre parcela e juros totais;
+- matriz 5 × 5 de **taxa anual × prazo**, com indicação visual das combinações dentro ou acima da parcela-alvo.
+
+No cenário padrão — R$100.000 financiados, 12% a.a., 48 meses e parcela-alvo de R$2.500 — os testes encontram aproximadamente:
+
+- parcela atual: **R$2.603,36**;
+- taxa máxima para o alvo: **9,64% a.a.**;
+- principal máximo: **R$96.029,58**;
+- redução necessária do principal: **R$3.970,42**;
+- prazo mínimo: **51 meses**.
+
+O cálculo continua sem CET, seguros, tarifas e outras cobranças institucionais.
+
+## Presets ilustrativos de cenário
+
+`presets-core.js` concentra três perfis reutilizáveis e testáveis. `presets.js` os aplica aos formulários A e B quando a ferramenta suporta o recurso.
+
+### Conservador
+
+- juros compostos / meta / retorno alternativo / amortizar: retorno de 6% a.a.;
+- comprar × alugar: valorização do imóvel de 2% a.a., investimento de 6% a.a. e reajuste do aluguel de 4% a.a.
+
+### Base
+
+- juros compostos / meta / retorno alternativo / amortizar: retorno de 10% a.a.;
+- comprar × alugar: valorização do imóvel de 4% a.a., investimento de 10% a.a. e reajuste do aluguel de 4% a.a.
+
+### Otimista
+
+- juros compostos / meta / retorno alternativo / amortizar: retorno de 12% a.a.;
+- comprar × alugar: valorização do imóvel de 6% a.a., investimento de 12% a.a. e reajuste do aluguel de 4% a.a.
+
+Esses perfis são **cenários ilustrativos**, não previsões de mercado. Eles não alteram automaticamente taxas contratuais como `mortgageRate` ou `debtRate`.
+
+## À vista ou parcelado — sensibilidade
+
+`cash-sensitivity-core.js` usa diretamente `cashVsInstallments()` e responde três perguntas de ponto de equilíbrio:
+
+- **preço à vista de equilíbrio**;
+- **parcela de equilíbrio**;
+- **retorno alternativo de equilíbrio**.
+
+O painel também mostra uma matriz 5 × 5 de preço à vista × retorno alternativo.
+
+No cenário padrão do MVP (R$ 4.500 à vista ou 12 × R$ 450, retorno alternativo de 10% a.a.), os testes encontram aproximadamente:
+
+- preço à vista de equilíbrio: **R$ 5.130,22**;
+- parcela de equilíbrio: **R$ 394,72**;
+- retorno alternativo de equilíbrio: **41,30% a.a.**.
+
+## Amortizar ou investir — sensibilidade
+
+`amortization-sensitivity-core.js` usa o mesmo `amortizeVsInvest()` do núcleo matemático.
+
+O painel mostra:
+
+- retorno mínimo do investimento para empatar com a amortização;
+- custo da dívida em que investir e amortizar empatam;
+- diferença atual em pontos percentuais;
+- matriz 5 × 5 de custo da dívida × retorno esperado.
+
+No modelo simplificado atual, o equilíbrio ocorre quando as taxas efetivas anuais se igualam.
+
+## Comprar ou alugar
+
+A rota `/comprar-ou-alugar` compara patrimônio líquido da compra com aluguel + investimento usando orçamento habitacional mensal equivalente.
+
+Premissas centrais:
+
+- entrada disponível;
+- financiamento Price;
+- aluguel e reajuste;
+- valorização do imóvel;
+- retorno dos investimentos;
+- custos recorrentes do proprietário;
+- horizonte da análise.
+
+## Custos imobiliários detalhados
+
+Os componentes começam em zero para preservar compatibilidade com cenários antigos. O usuário pode informar:
+
+- ITBI + cartório + registro;
+- corretagem/custos de venda;
+- IPTU anual;
+- manutenção anual;
+- seguro mensal do proprietário;
+- condomínio extraordinário mensal;
+- imposto simplificado sobre ganhos positivos da carteira.
+
+`housing-costs.js` oferece dois atalhos editáveis:
+
+- **Aplicar referência detalhada**: 4,5% aquisição, 5% venda, IPTU 0,6%, manutenção 0,8%, seguro R$100/mês, condomínio extraordinário R$150/mês e imposto simplificado 15%;
+- **Usar consolidado 1,5%**: mantém apenas o custo anual consolidado.
+
+Os números são referências de modelagem, não tabela oficial de custos.
+
+## Comprar ou alugar — sensibilidade
+
+`sensitivity-core.js` calcula com o mesmo `buyVsRentProjection()`:
+
+- valorização anual de equilíbrio do imóvel;
+- aluguel inicial de equilíbrio;
+- matriz 5 × 5 de valorização × retorno de investimentos;
+- threshold equivalente sem custos detalhados, quando esses custos estão ativos.
+
+O solver faz varredura + bisseção e informa `fora da faixa` quando não encontra cruzamento.
+
+No cenário padrão sem custos detalhados adicionais, os testes encontram aproximadamente:
+
+- valorização de equilíbrio: **6,38% a.a.**;
+- aluguel inicial de equilíbrio: **R$ 3.225/mês**.
+
+## Resumo da Decisão
+
+`decision-report.js` adiciona uma seção consolidada às ferramentas mais analíticas:
+
+- Juros compostos;
+- Financiamento Price;
+- À vista × parcelado;
+- Amortizar × investir;
+- Meta de patrimônio;
+- Comprar × alugar.
+
+O resumo reúne resultado, métricas, premissas do Cenário A, pontos de equilíbrio, Cenário B quando ativo, URL exata e nota metodológica. No financiamento, os thresholds de taxa, principal, prazo e impacto de +1 p.p. entram automaticamente no resumo.
+
+### Copiar resumo
+
+O botão `Copiar resumo` produz texto simples com resultado, métricas, premissas, thresholds e link.
+
+### Imprimir / salvar PDF
+
+O botão `Imprimir / salvar PDF` cria temporariamente uma versão limpa do resumo e chama a impressão nativa do navegador. O usuário pode imprimir ou escolher **Salvar como PDF**.
+
+## Arquitetura
+
+Principais módulos:
+
+- `formulas.js`: fórmulas e séries temporais;
+- `app.js`: interface base;
+- `decisions.js`: simuladores de decisão;
+- `financing-enhancement.js`: parcela-alvo do financiamento;
+- `financing-sensitivity-core.js` / `financing-sensitivity.js`: thresholds e matriz Price;
+- `housing.js`: Comprar × Alugar;
+- `housing-costs.js`: custos imobiliários opcionais;
+- `core-adapter.js`: integração do núcleo testável;
+- `compare.js`: Cenário B;
+- `charts.js`: gráficos SVG;
+- `sensitivity-core.js` / `sensitivity.js`: sensibilidade imobiliária;
+- `amortization-sensitivity-core.js` / `amortization-sensitivity.js`: sensibilidade de amortização;
+- `cash-sensitivity-core.js` / `cash-sensitivity.js`: sensibilidade à vista × parcelado;
+- `presets-core.js` / `presets.js`: cenários ilustrativos;
+- `decision-report.js`: resumo, cópia e impressão;
+- `scenario.js` + `share.js`: serialização e compartilhamento.
+
+## Testes automatizados
+
+As suítes em `calculadoras/tests/` cobrem:
+
+- fórmulas principais e séries;
+- URLs e Cenário A/B;
+- Financiamento Price, parcela-alvo, taxa/principal/prazo de equilíbrio e matriz;
+- Comprar × Alugar;
+- custos imobiliários;
+- sensibilidade imobiliária;
+- Amortizar × Investir e sua matriz;
+- À Vista × Parcelado, thresholds e matriz;
+- presets e garantia de não alterar taxas contratuais.
+
+Para rodar localmente:
+
+```bash
+node --test calculadoras/tests/*.test.js
+```
+
+Para verificar sintaxe:
+
+```bash
+for file in calculadoras/*.js; do node --check "$file"; done
+```
+
+O workflow `.github/workflows/calculadoras-tests.yml` executa automaticamente essas verificações.
+
+## URLs disponíveis
+
+- `/juros-compostos`
+- `/financiamento`
+- `/porcentagem`
+- `/desconto`
+- `/regra-de-tres`
+- `/roi`
+- `/margem-e-markup`
+- `/custo-de-combustivel`
+- `/avista-ou-parcelado`
+- `/amortizar-ou-investir`
+- `/meta-de-patrimonio`
+- `/comprar-ou-alugar`
+
+## Rodar localmente
+
+```bash
+cd calculadoras
+python -m http.server 8000
+```
+
+Acesse `http://localhost:8000`.
+
+Um servidor HTTP simples não interpreta `_redirects`; as rotas amigáveis completas devem ser validadas no Cloudflare Pages.
+
+## Deploy no Cloudflare Pages
+
+- repositório: `rsucupira/Pythonzinho`;
+- branch de produção: `master` após merge;
+- Framework preset: `None`;
+- Build command: vazio;
+- Build output directory: `calculadoras`.
+
+## SEO
+
+`routing.js` adapta `<title>`, description, canonical, Open Graph, Twitter metadata e conteúdo principal por rota. `sitemap.template.xml` contém home + 12 ferramentas e permanece como template até o domínio final ser definido.
+
+## Próximos passos sugeridos
+
+1. Publicar o primeiro preview no Cloudflare Pages.
+2. Conectar domínio/subdomínio e ativar `sitemap.xml`.
+3. Criar uma tela inicial focada em perguntas/decisões, não em nomes de calculadoras.
+4. Adicionar comparação visual de múltiplos cenários salvos.
+5. Integrar APIs somente para dados realmente atuais, como CDI e inflação.
+
+## Aviso
+
+Os resultados são estimativas educacionais. Valores reais podem envolver CET, impostos, tarifas, risco, liquidez, regras contratuais, custos regionais e outras variáveis não modeladas.

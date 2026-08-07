@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Pythonzinho Calcula: hub gratuito de calculadoras e simuladores para dinheiro, finanças, compras, negócios e dia a dia." />
+  <meta name="robots" content="index, follow" />
+  <meta name="theme-color" content="#0b1220" />
+  <meta property="og:site_name" content="Pythonzinho Calcula" />
+  <link rel="canonical" href="/" />
+  <title>Pythonzinho Calcula — contas úteis em segundos</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/styles.css" />
+  <link rel="stylesheet" href="/decisions.css" />
+  <link rel="stylesheet" href="/charts.css" />
+  <link rel="stylesheet" href="/compare.css" />
+  <link rel="stylesheet" href="/sensitivity.css" />
+  <link rel="stylesheet" href="/housing-costs.css" />
+  <link rel="stylesheet" href="/amortization-sensitivity.css" />
+  <link rel="stylesheet" href="/cash-sensitivity.css" />
+  <link rel="stylesheet" href="/financing-sensitivity.css" />
+  <link rel="stylesheet" href="/presets.css" />
+  <link rel="stylesheet" href="/decision-report.css" />
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/" aria-label="Pythonzinho Calcula — início">
+      <span class="brand-mark">P</span>
+      <span>Pythonzinho <strong>Calcula</strong></span>
+    </a>
+    <a class="github-link" href="https://github.com/rsucupira/Pythonzinho" target="_blank" rel="noreferrer">GitHub ↗</a>
+  </header>
+
+  <main>
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="eyebrow">MVP · 12 ferramentas gratuitas</div>
+      <h1 id="hero-title">Uma pergunta.<br /><span>Uma conta.</span></h1>
+      <p>Faça cálculos úteis do dia a dia, compare cenários e entenda o resultado sem planilha.</p>
+
+      <label class="search" for="calculator-search">
+        <span aria-hidden="true">⌕</span>
+        <input id="calculator-search" type="search" placeholder="O que você quer calcular? Ex.: juros, imóvel, parcelado, meta..." autocomplete="off" />
+      </label>
+
+      <div class="quick-links" aria-label="Atalhos">
+        <span>Populares:</span>
+        <button data-open="comprar-ou-alugar">Comprar ou alugar?</button>
+        <button data-open="avista-ou-parcelado">À vista ou parcelado?</button>
+        <button data-open="juros-compostos">Juros compostos</button>
+      </div>
+    </section>
+
+    <section class="workspace" aria-label="Calculadoras">
+      <aside class="catalog">
+        <div class="catalog-heading">
+          <div>
+            <span class="section-kicker">Ferramentas</span>
+            <h2>Escolha uma conta</h2>
+          </div>
+          <span id="calculator-count" class="count">12</span>
+        </div>
+        <div id="calculator-list" class="calculator-list"></div>
+        <div id="empty-state" class="empty-state" hidden>
+          Nenhuma calculadora encontrada. Tente outro termo.
+        </div>
+      </aside>
+
+      <section id="calculator-panel" class="calculator-panel" aria-live="polite"></section>
+    </section>
+
+    <section class="decision-section">
+      <div>
+        <span class="section-kicker">Simuladores de decisão</span>
+        <h2>Não apenas calcule. Compare alternativas.</h2>
+      </div>
+      <div class="decision-grid">
+        <article>
+          <span>01</span>
+          <h3>Comprar ou alugar?</h3>
+          <p>Compare patrimônio no imóvel com aluguel mais investimento ao longo dos anos.</p>
+          <button data-open="comprar-ou-alugar" type="button">Simular agora →</button>
+        </article>
+        <article>
+          <span>02</span>
+          <h3>À vista ou parcelado?</h3>
+          <p>Compare preço, valor presente das parcelas e custo de oportunidade.</p>
+          <button data-open="avista-ou-parcelado" type="button">Simular agora →</button>
+        </article>
+        <article>
+          <span>03</span>
+          <h3>Amortizar ou investir?</h3>
+          <p>Compare o custo efetivo da dívida com o retorno esperado do investimento.</p>
+          <button data-open="amortizar-ou-investir" type="button">Simular agora →</button>
+        </article>
+        <article>
+          <span>04</span>
+          <h3>Quando atinjo minha meta?</h3>
+          <p>Projete o tempo necessário para chegar ao patrimônio desejado.</p>
+          <button data-open="meta-de-patrimonio" type="button">Simular agora →</button>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>Pythonzinho Calcula · MVP experimental. Resultados são estimativas e não constituem recomendação financeira.</p>
+  </footer>
+
+  <script src="/routing.js"></script>
+  <script src="/formulas.js"></script>
+  <script src="/sensitivity-core.js"></script>
+  <script src="/amortization-sensitivity-core.js"></script>
+  <script src="/cash-sensitivity-core.js"></script>
+  <script src="/financing-sensitivity-core.js"></script>
+  <script src="/presets-core.js"></script>
+  <script src="/scenario.js"></script>
+  <script src="/app.js"></script>
+  <script src="/decisions.js"></script>
+  <script src="/housing.js"></script>
+  <script src="/financing-enhancement.js"></script>
+  <script src="/core-adapter.js"></script>
+  <script src="/share.js"></script>
+  <script src="/compare.js"></script>
+  <script src="/housing-costs.js"></script>
+  <script src="/presets.js"></script>
+  <script src="/charts.js"></script>
+  <script src="/sensitivity.js"></script>
+  <script src="/amortization-sensitivity.js"></script>
+  <script src="/cash-sensitivity.js"></script>
+  <script src="/financing-sensitivity.js"></script>
+  <script src="/decision-report.js"></script>
+</body>
+</html>

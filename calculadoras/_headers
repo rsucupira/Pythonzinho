@@ -1,0 +1,43 @@
+/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: geolocation=(), camera=(), microphone=()
+
+/
+  Link: </>; rel="canonical"
+
+/juros-compostos
+  Link: </juros-compostos>; rel="canonical"
+
+/financiamento
+  Link: </financiamento>; rel="canonical"
+
+/porcentagem
+  Link: </porcentagem>; rel="canonical"
+
+/desconto
+  Link: </desconto>; rel="canonical"
+
+/regra-de-tres
+  Link: </regra-de-tres>; rel="canonical"
+
+/roi
+  Link: </roi>; rel="canonical"
+
+/margem-e-markup
+  Link: </margem-e-markup>; rel="canonical"
+
+/custo-de-combustivel
+  Link: </custo-de-combustivel>; rel="canonical"
+
+/avista-ou-parcelado
+  Link: </avista-ou-parcelado>; rel="canonical"
+
+/amortizar-ou-investir
+  Link: </amortizar-ou-investir>; rel="canonical"
+
+/meta-de-patrimonio
+  Link: </meta-de-patrimonio>; rel="canonical"
+
+/comprar-ou-alugar
+  Link: </comprar-ou-alugar>; rel="canonical"
