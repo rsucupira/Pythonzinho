@@ -1,5 +1,5 @@
 (() => {
-  const SUPPORTED = new Set(['juros-compostos', 'financiamento', 'meta-de-patrimonio', 'comprar-ou-alugar']);
+  const SUPPORTED = new Set(['juros-compostos', 'financiamento', 'amortizar-ou-investir', 'meta-de-patrimonio', 'comprar-ou-alugar']);
   const panel = document.querySelector('#calculator-panel');
   if (!panel) return;
 
