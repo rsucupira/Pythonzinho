@@ -1,6 +1,7 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const math = require('../formulas.js');
+const scenario = require('../scenario.js');
 
 const BASE = {
   propertyPrice: 100000,
@@ -73,6 +74,28 @@ test('tributação simplificada incide apenas sobre ganho positivo da carteira',
   approx(result.renterNetWorth, 108000, 1e-4);
   approx(result.buyerNetWorth, 100000, 1e-4);
   approx(result.difference, -8000, 1e-4);
+});
+
+test('URL preserva custos detalhados do cenário imobiliário', () => {
+  const fields = [
+    { id: 'propertyPrice' },
+    { id: 'purchaseCostRate' },
+    { id: 'saleCostRate' },
+    { id: 'propertyTaxRate' },
+    { id: 'maintenanceRate' },
+    { id: 'investmentTaxRate' }
+  ];
+  const values = {
+    propertyPrice: 500000,
+    purchaseCostRate: 4.5,
+    saleCostRate: 5,
+    propertyTaxRate: 0.6,
+    maintenanceRate: 0.8,
+    investmentTaxRate: 15
+  };
+  const path = scenario.encode('comprar-ou-alugar', fields, values);
+  const decoded = scenario.decode(path.slice(path.indexOf('?')), fields);
+  assert.deepEqual(decoded, values);
 });
 
 test('custos detalhados rejeitam taxas negativas', () => {
