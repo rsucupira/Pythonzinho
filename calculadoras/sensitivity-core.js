@@ -9,6 +9,15 @@
   if (!math) throw new Error('CalculadoraMath is required');
 
   const MONEY_TOLERANCE = 1;
+  const DETAILED_COST_KEYS = [
+    'purchaseCostRate',
+    'saleCostRate',
+    'propertyTaxRate',
+    'maintenanceRate',
+    'ownerInsuranceMonthly',
+    'hoaExtraMonthly',
+    'investmentTaxRate'
+  ];
 
   function outcome(difference, tolerance = MONEY_TOLERANCE) {
     if (difference > tolerance) return 'buy';
@@ -18,6 +27,12 @@
 
   function evaluate(values, key, value) {
     return math.buyVsRentProjection({ ...values, [key]: value }).difference;
+  }
+
+  function withoutDetailedCosts(values) {
+    const clean = { ...values };
+    DETAILED_COST_KEYS.forEach((key) => { clean[key] = 0; });
+    return clean;
   }
 
   function findBreakEven(values, key, options = {}) {
@@ -82,7 +97,6 @@
 
     let [low, high] = intervals[0];
     let lowY = evaluate(values, key, low);
-    let highY = evaluate(values, key, high);
 
     if (low !== high) {
       for (let i = 0; i < 70 && high - low > valueTolerance; i += 1) {
@@ -91,8 +105,6 @@
         if (Math.abs(midY) <= moneyTolerance) {
           low = mid;
           high = mid;
-          lowY = midY;
-          highY = midY;
           break;
         }
         if (Math.sign(lowY) === Math.sign(midY)) {
@@ -100,7 +112,6 @@
           lowY = midY;
         } else {
           high = mid;
-          highY = midY;
         }
       }
     }
@@ -125,6 +136,29 @@
     return Array.from({ length: count }, (_, index) => Math.max(floor, center + (index - half) * step));
   }
 
+  function propertyBreakEven(values) {
+    return findBreakEven(values, 'propertyAppreciation', {
+      min: -20,
+      max: 30,
+      samples: 150,
+      valueTolerance: 1e-6
+    });
+  }
+
+  function rentBreakEven(values) {
+    const rentUpper = Math.max(
+      10000,
+      Number(values.rentMonthly) * 5,
+      Number(values.propertyPrice) * 0.025
+    );
+    return findBreakEven(values, 'rentMonthly', {
+      min: 0,
+      max: rentUpper,
+      samples: 160,
+      valueTolerance: 0.01
+    });
+  }
+
   function buyVsRentSensitivity(values) {
     const propertyRates = centeredValues(Number(values.propertyAppreciation), 2, 5, -90);
     const investmentRates = centeredValues(Number(values.investmentReturn), 2, 5, -90);
@@ -145,31 +179,22 @@
       })
     }));
 
-    const propertyBreakEven = findBreakEven(values, 'propertyAppreciation', {
-      min: -20,
-      max: 30,
-      samples: 150,
-      valueTolerance: 1e-6
-    });
-
-    const rentUpper = Math.max(
-      10000,
-      Number(values.rentMonthly) * 5,
-      Number(values.propertyPrice) * 0.025
-    );
-    const rentBreakEven = findBreakEven(values, 'rentMonthly', {
-      min: 0,
-      max: rentUpper,
-      samples: 160,
-      valueTolerance: 0.01
-    });
-
     const current = math.buyVsRentProjection(values);
+    const currentPropertyBreakEven = propertyBreakEven(values);
+    const currentRentBreakEven = rentBreakEven(values);
+
+    const noDetailedValues = withoutDetailedCosts(values);
+    const noDetailed = {
+      current: math.buyVsRentProjection(noDetailedValues),
+      propertyBreakEven: propertyBreakEven(noDetailedValues),
+      rentBreakEven: rentBreakEven(noDetailedValues)
+    };
 
     return {
       current,
-      propertyBreakEven,
-      rentBreakEven,
+      propertyBreakEven: currentPropertyBreakEven,
+      rentBreakEven: currentRentBreakEven,
+      noDetailed,
       propertyRates,
       investmentRates,
       matrix
@@ -179,6 +204,7 @@
   return {
     outcome,
     evaluate,
+    withoutDetailedCosts,
     findBreakEven,
     centeredValues,
     buyVsRentSensitivity
