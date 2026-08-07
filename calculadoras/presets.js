@@ -20,6 +20,10 @@
     });
 
     if (lastInput) lastInput.dispatchEvent(new Event('input', { bubbles: true }));
+    if (!prefix && form.id === 'active-form' && typeof calculateActive === 'function') {
+      calculateActive(calc, form);
+    }
+
     const status = form.querySelector('[data-preset-status]');
     if (status) status.textContent = `${profile.label} aplicado`;
   }
