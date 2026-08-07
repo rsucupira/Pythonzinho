@@ -178,6 +178,12 @@
     return { ...summary, points };
   }
 
+  function liquidPortfolioValue(grossValue, contributionBasis, taxRate) {
+    const taxableGain = Math.max(0, grossValue - contributionBasis);
+    const tax = taxableGain * taxRate / 100;
+    return { value: grossValue - tax, tax, taxableGain };
+  }
+
   function buyVsRentSeries({
     propertyPrice,
     downPayment,
@@ -187,12 +193,34 @@
     rentGrowthRate,
     propertyAppreciation,
     investmentReturn,
-    ownerCostRate,
+    ownerCostRate = 0,
+    purchaseCostRate = 0,
+    saleCostRate = 0,
+    propertyTaxRate = 0,
+    maintenanceRate = 0,
+    ownerInsuranceMonthly = 0,
+    hoaExtraMonthly = 0,
+    investmentTaxRate = 0,
     horizonYears
   }) {
     if (propertyPrice <= 0) throw new RangeError('propertyPrice must be positive');
     if (downPayment < 0 || downPayment > propertyPrice) throw new RangeError('downPayment must be between zero and propertyPrice');
     if (rentMonthly < 0) throw new RangeError('rentMonthly must be non-negative');
+
+    const nonNegativeCosts = {
+      ownerCostRate,
+      purchaseCostRate,
+      saleCostRate,
+      propertyTaxRate,
+      maintenanceRate,
+      ownerInsuranceMonthly,
+      hoaExtraMonthly,
+      investmentTaxRate
+    };
+    for (const [key, value] of Object.entries(nonNegativeCosts)) {
+      if (!Number.isFinite(value) || value < 0) throw new RangeError(`${key} must be non-negative`);
+    }
+    if (investmentTaxRate > 100) throw new RangeError('investmentTaxRate must be at most 100');
 
     const horizonMonths = Math.max(1, Math.round(horizonYears * 12));
     const mortgageMonths = Math.max(1, Math.round(mortgageYears * 12));
@@ -201,25 +229,41 @@
     const propertyMonthlyRate = annualToMonthlyRate(propertyAppreciation);
     const rentMonthlyRate = annualToMonthlyRate(rentGrowthRate);
     const investmentMonthlyRate = annualToMonthlyRate(investmentReturn);
-    const ownerMonthlyRate = ownerCostRate / 100 / 12;
+    const variableOwnerMonthlyRate = (ownerCostRate + propertyTaxRate + maintenanceRate) / 100 / 12;
+    const fixedOwnerMonthlyCost = ownerInsuranceMonthly + hoaExtraMonthly;
+    const purchaseCosts = propertyPrice * purchaseCostRate / 100;
 
     let propertyValue = propertyPrice;
     let debtBalance = principal;
     let currentRent = rentMonthly;
-    let buyerPortfolio = 0;
-    let renterPortfolio = downPayment;
-    let totalBuyerHousingCost = 0;
+    let buyerPortfolioGross = 0;
+    let renterPortfolioGross = downPayment + purchaseCosts;
+    let buyerContributionBasis = 0;
+    let renterContributionBasis = renterPortfolioGross;
+    let totalBuyerHousingCost = purchaseCosts;
     let totalRentPaid = 0;
 
-    const points = [{
-      month: 0,
-      buyerNetWorth: propertyValue - debtBalance,
-      renterNetWorth: renterPortfolio,
-      homeEquity: propertyValue - debtBalance,
-      propertyValue,
-      debtBalance,
-      rent: currentRent
-    }];
+    function snapshot(month) {
+      const saleCosts = propertyValue * saleCostRate / 100;
+      const liquidHomeEquity = propertyValue - debtBalance - saleCosts;
+      const buyerPortfolio = liquidPortfolioValue(buyerPortfolioGross, buyerContributionBasis, investmentTaxRate);
+      const renterPortfolio = liquidPortfolioValue(renterPortfolioGross, renterContributionBasis, investmentTaxRate);
+      return {
+        month,
+        buyerNetWorth: liquidHomeEquity + buyerPortfolio.value,
+        renterNetWorth: renterPortfolio.value,
+        homeEquity: propertyValue - debtBalance,
+        liquidHomeEquity,
+        propertyValue,
+        debtBalance,
+        rent: currentRent,
+        saleCosts,
+        buyerPortfolioTax: buyerPortfolio.tax,
+        renterPortfolioTax: renterPortfolio.tax
+      };
+    }
+
+    const points = [snapshot(0)];
 
     for (let month = 1; month <= horizonMonths; month += 1) {
       let mortgagePayment = 0;
@@ -232,29 +276,24 @@
         debtBalance = Math.max(0, debtBalance - principalPaid);
       }
 
-      const ownerCost = propertyValue * ownerMonthlyRate;
+      const ownerVariableCost = propertyValue * variableOwnerMonthlyRate;
+      const ownerCost = ownerVariableCost + fixedOwnerMonthlyCost;
       const buyerHousingCost = mortgagePayment + ownerCost;
       const renterHousingCost = currentRent;
       const commonBudget = Math.max(buyerHousingCost, renterHousingCost);
+      const buyerContribution = commonBudget - buyerHousingCost;
+      const renterContribution = commonBudget - renterHousingCost;
 
-      buyerPortfolio = buyerPortfolio * (1 + investmentMonthlyRate) + (commonBudget - buyerHousingCost);
-      renterPortfolio = renterPortfolio * (1 + investmentMonthlyRate) + (commonBudget - renterHousingCost);
+      buyerPortfolioGross = buyerPortfolioGross * (1 + investmentMonthlyRate) + buyerContribution;
+      renterPortfolioGross = renterPortfolioGross * (1 + investmentMonthlyRate) + renterContribution;
+      buyerContributionBasis += buyerContribution;
+      renterContributionBasis += renterContribution;
       totalBuyerHousingCost += buyerHousingCost;
       totalRentPaid += renterHousingCost;
 
       propertyValue *= (1 + propertyMonthlyRate);
       currentRent *= (1 + rentMonthlyRate);
-
-      const homeEquity = propertyValue - debtBalance;
-      points.push({
-        month,
-        buyerNetWorth: homeEquity + buyerPortfolio,
-        renterNetWorth: renterPortfolio,
-        homeEquity,
-        propertyValue,
-        debtBalance,
-        rent: currentRent
-      });
+      points.push(snapshot(month));
     }
 
     const last = points[points.length - 1];
@@ -267,13 +306,18 @@
       propertyValue: last.propertyValue,
       remainingDebt: last.debtBalance,
       homeEquity: last.homeEquity,
-      buyerPortfolio,
-      renterPortfolio: last.renterNetWorth,
+      liquidHomeEquity: last.liquidHomeEquity,
+      buyerPortfolio: buyerPortfolioGross,
+      renterPortfolio: renterPortfolioGross,
       buyerNetWorth: last.buyerNetWorth,
       renterNetWorth: last.renterNetWorth,
       difference,
       recommendation,
       finalRent: last.rent,
+      purchaseCosts,
+      saleCosts: last.saleCosts,
+      buyerInvestmentTax: last.buyerPortfolioTax,
+      renterInvestmentTax: last.renterPortfolioTax,
       totalBuyerHousingCost,
       totalRentPaid,
       points
