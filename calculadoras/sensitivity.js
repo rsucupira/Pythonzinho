@@ -52,7 +52,19 @@
     return `Não foi encontrado um cruzamento estável dentro da faixa ${rangeText}.`;
   }
 
-  function propertyCard(point) {
+  function propertyBaseline(current, baseline) {
+    if (!current.found || !baseline?.found) return '';
+    if (Math.abs(current.value - baseline.value) < 0.005) return '';
+    return `<small class="sensitivity-baseline">Sem custos detalhados: ${NUMBER.format(baseline.value)}% a.a.</small>`;
+  }
+
+  function rentBaseline(current, baseline) {
+    if (!current.found || !baseline?.found) return '';
+    if (Math.abs(current.value - baseline.value) < 1) return '';
+    return `<small class="sensitivity-baseline">Sem custos detalhados: ${BRL.format(baseline.value)}/mês</small>`;
+  }
+
+  function propertyCard(point, baseline) {
     if (!point.found) {
       return `
         <article class="sensitivity-card">
@@ -67,10 +79,11 @@
         <span>Valorização de equilíbrio</span>
         <strong>${formatted}</strong>
         <p>${thresholdDirection(point, formatted)}.</p>
+        ${propertyBaseline(point, baseline)}
       </article>`;
   }
 
-  function rentCard(point) {
+  function rentCard(point, baseline) {
     if (!point.found) {
       return `
         <article class="sensitivity-card">
@@ -85,6 +98,7 @@
         <span>Aluguel de equilíbrio</span>
         <strong>${formatted}</strong>
         <p>${thresholdDirection(point, formatted)}.</p>
+        ${rentBaseline(point, baseline)}
       </article>`;
   }
 
@@ -165,7 +179,7 @@
         <div>
           <span class="section-kicker">Sensibilidade</span>
           <h3>O que precisa mudar para inverter a decisão?</h3>
-          <p>Os pontos de equilíbrio e a matriz abaixo usam somente o Cenário A e mantêm todas as outras premissas constantes.</p>
+          <p>Os pontos de equilíbrio e a matriz abaixo usam somente o Cenário A. Quando custos detalhados estão ativos, os cards também mostram o threshold equivalente sem esses custos.</p>
         </div>
         <div class="sensitivity-current-result">
           <span>Resultado atual</span>
@@ -174,8 +188,8 @@
         </div>
       </div>
       <div class="sensitivity-cards">
-        ${propertyCard(data.propertyBreakEven)}
-        ${rentCard(data.rentBreakEven)}
+        ${propertyCard(data.propertyBreakEven, data.noDetailed.propertyBreakEven)}
+        ${rentCard(data.rentBreakEven, data.noDetailed.rentBreakEven)}
       </div>
       <div class="sensitivity-matrix-head">
         <div>
@@ -184,7 +198,7 @@
         </div>
       </div>
       ${renderMatrix(data, values)}
-      <p class="sensitivity-note">A análise altera uma ou duas premissas por vez e não substitui cenários completos. Custos e limitações descritos no simulador continuam valendo.</p>
+      <p class="sensitivity-note">A análise altera uma ou duas premissas por vez e não substitui cenários completos. Os custos detalhados informados no Cenário A permanecem ativos em toda a matriz.</p>
     `;
   }
 
