@@ -18,6 +18,20 @@
     return { months, monthlyRate, balance, invested, earnings: balance - invested };
   }
 
+  function compoundSeries({ initial, monthly, annualRate, years }) {
+    const months = Math.max(0, Math.round(years * 12));
+    const monthlyRate = annualToMonthlyRate(annualRate);
+    let balance = initial;
+    let contributed = initial;
+    const points = [{ month: 0, balance, contributed }];
+    for (let month = 1; month <= months; month += 1) {
+      balance = balance * (1 + monthlyRate) + monthly;
+      contributed += monthly;
+      points.push({ month, balance, contributed });
+    }
+    return { months, monthlyRate, points, balance, contributed, earnings: balance - contributed };
+  }
+
   function priceFinancing({ principal, annualRate, months }) {
     const n = Math.max(1, Math.round(months));
     const monthlyRate = annualToMonthlyRate(annualRate);
@@ -128,6 +142,22 @@
     };
   }
 
+  function targetSeries({ target, current, monthly, annualRate, maxMonths = 1200 }) {
+    const monthlyRate = annualToMonthlyRate(annualRate);
+    let balance = current;
+    let contributed = current;
+    let month = 0;
+    const points = [{ month, balance, contributed, target }];
+    while (balance < target && month < maxMonths) {
+      balance = balance * (1 + monthlyRate) + monthly;
+      contributed += monthly;
+      month += 1;
+      points.push({ month, balance, contributed, target });
+    }
+    if (points.length === 1) points.push({ month: 1, balance, contributed, target });
+    return { reached: balance >= target, months: month, monthlyRate, balance, contributed, points };
+  }
+
   function priceSchedule({ principal, annualRate, months }) {
     const summary = priceFinancing({ principal, annualRate, months });
     let balance = principal;
@@ -151,6 +181,7 @@
   return {
     annualToMonthlyRate,
     compoundProjection,
+    compoundSeries,
     priceFinancing,
     priceSchedule,
     percentage,
@@ -161,6 +192,7 @@
     fuelCost,
     cashVsInstallments,
     amortizeVsInvest,
-    targetProjection
+    targetProjection,
+    targetSeries
   };
 });
